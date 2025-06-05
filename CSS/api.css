@@ -1,0 +1,460 @@
+/* Base Styles */
+:root {
+  --primary-color: #4f46e5;
+  --primary-dark: #4338ca;
+  --primary-light: #e0e7ff;
+  --secondary-color: #10b981;
+  --text-color: #1f2937;
+  --text-light: #6b7280;
+  --background-color: #ffffff;
+  --background-alt: #f9fafb;
+  --border-color: #e5e7eb;
+  --danger-color: #ef4444;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --code-bg: #f8fafc;
+  --sidebar-width: 280px;
+  --box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+    "Helvetica Neue", sans-serif;
+  color: var(--text-color);
+  line-height: 1.6;
+  background-color: var(--background-alt);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul {
+  list-style: none;
+}
+
+/* Button Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  font-size: 0.875rem;
+  gap: 0.5rem;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.btn-outline:hover {
+  background-color: var(--background-color);
+}
+
+/* Layout */
+.api-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.api-sidebar {
+  width: var(--sidebar-width);
+  background-color: var(--background-color);
+  border-right: 1px solid var(--border-color);
+  position: fixed;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.sidebar-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.logo i {
+  margin-right: 0.5rem;
+}
+
+/* API Navigation */
+.api-nav {
+  padding: 1rem 0;
+}
+
+.api-nav ul {
+  list-style: none;
+}
+
+.api-nav li {
+  margin-bottom: 0.25rem;
+}
+
+.api-nav a {
+  display: block;
+  padding: 0.75rem 1.5rem;
+  color: var(--text-light);
+  transition: all 0.2s ease;
+  border-right: 3px solid transparent;
+}
+
+.api-nav a:hover,
+.api-nav a.active {
+  color: var(--primary-color);
+  background-color: var(--primary-light);
+  border-right-color: var(--primary-color);
+}
+
+/* API Key Section */
+.api-key-section {
+  padding: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  margin-top: auto;
+}
+
+.api-key-section h4 {
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.api-key-display {
+  display: flex;
+  align-items: center;
+  background-color: var(--code-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.api-key-display code {
+  flex: 1;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 0.75rem;
+  color: var(--text-color);
+  word-break: break-all;
+}
+
+.copy-btn {
+  background: none;
+  border: none;
+  color: var(--text-light);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: color 0.2s ease;
+}
+
+.copy-btn:hover {
+  color: var(--primary-color);
+}
+
+.api-key-note {
+  font-size: 0.75rem;
+  color: var(--text-light);
+}
+
+/* Main Content */
+.api-content {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  padding: 2rem;
+  max-width: calc(100vw - var(--sidebar-width));
+}
+
+.api-header {
+  margin-bottom: 3rem;
+}
+
+.api-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.api-header p {
+  font-size: 1.125rem;
+  color: var(--text-light);
+  margin-bottom: 1.5rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+/* API Sections */
+.api-section {
+  margin-bottom: 4rem;
+  scroll-margin-top: 2rem;
+}
+
+.api-section h2 {
+  font-size: 1.875rem;
+  margin-bottom: 1rem;
+  color: var(--text-color);
+}
+
+.api-section h3 {
+  font-size: 1.25rem;
+  margin: 2rem 0 1rem;
+  color: var(--text-color);
+}
+
+.api-section p {
+  margin-bottom: 1.5rem;
+  color: var(--text-light);
+}
+
+/* Info Boxes */
+.info-box {
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.info-box h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.info-box code {
+  background-color: var(--code-bg);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+}
+
+.info-box ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  list-style: disc;
+}
+
+.info-box li {
+  margin-bottom: 0.5rem;
+}
+
+/* Feature Grid */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.feature-item {
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.feature-item i {
+  font-size: 2rem;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+.feature-item h4 {
+  margin-bottom: 0.5rem;
+}
+
+.feature-item p {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+/* Endpoint Box */
+.endpoint-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 1.5rem 0;
+}
+
+.method {
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.method.post {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.endpoint-box code {
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Parameters Table */
+.params-table {
+  margin: 1.5rem 0;
+  overflow-x: auto;
+}
+
+.params-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--background-color);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: var(--box-shadow);
+}
+
+.params-table th,
+.params-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.params-table th {
+  background-color: var(--background-alt);
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.params-table code {
+  background-color: var(--code-bg);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 0.875rem;
+}
+
+/* Code Blocks */
+.code-block {
+  margin: 1.5rem 0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: var(--box-shadow);
+}
+
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--text-color);
+  color: white;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.copy-code-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s ease;
+}
+
+.copy-code-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.code-block pre {
+  margin: 0;
+  padding: 1rem;
+  background-color: var(--code-bg);
+  overflow-x: auto;
+}
+
+.code-block code {
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .api-sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .api-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .api-content {
+    margin-left: 0;
+    max-width: 100vw;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .api-content {
+    padding: 1rem;
+  }
+
+  .api-header h1 {
+    font-size: 2rem;
+  }
+
+  .endpoint-box {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .params-table {
+    font-size: 0.875rem;
+  }
+
+  .params-table th,
+  .params-table td {
+    padding: 0.5rem;
+  }
+}

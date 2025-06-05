@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation - FraudShield</title>
+    <link rel="stylesheet" href="../CSS/api.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+</head>
+<body>
+    <div class="api-container">
+        <!-- Sidebar -->
+        <aside class="api-sidebar">
+            <div class="sidebar-header">
+                <a href="dashboard.html" class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>FraudShield</span>
+                </a>
+            </div>
+            
+            <nav class="api-nav">
+                <ul>
+                    <li><a href="#overview" class="active">Overview</a></li>
+                    <li><a href="#authentication">Authentication</a></li>
+                    <li><a href="#website-check">Website Check</a></li>
+                    <li><a href="#transaction-check">Transaction Check</a></li>
+                    <li><a href="#response-format">Response Format</a></li>
+                    <li><a href="#error-codes">Error Codes</a></li>
+                    <li><a href="#rate-limits">Rate Limits</a></li>
+                </ul>
+            </nav>
+            
+            <div class="api-key-section">
+                <h4>Your API Key</h4>
+                <div class="api-key-display">
+                    <code id="apiKeyDisplay">Loading...</code>
+                    <button id="copyApiKey" class="copy-btn" title="Copy API Key">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                <p class="api-key-note">Keep your API key secure and don't share it publicly.</p>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="api-content">
+            <div class="api-header">
+                <h1>FraudShield API Documentation</h1>
+                <p>Integrate fraud detection into your applications with our simple REST API</p>
+                <div class="header-actions">
+                    <a href="dashboard.html" class="btn btn-outline">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Dashboard
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Overview Section -->
+            <section id="overview" class="api-section">
+                <h2>Overview</h2>
+                <p>The FraudShield API provides endpoints for detecting fraud in websites and financial transactions. All API requests require authentication via API key and return JSON responses.</p>
+                
+                <div class="info-box">
+                    <h3>Base URL</h3>
+                    <code>http://localhost:8000</code>
+                </div>
+                
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <i class="fas fa-globe"></i>
+                        <h4>Website Fraud Detection</h4>
+                        <p>Analyze websites for fraud indicators</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-exchange-alt"></i>
+                        <h4>Transaction Analysis</h4>
+                        <p>Detect fraudulent financial transactions</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-bolt"></i>
+                        <h4>Real-time Results</h4>
+                        <p>Get instant fraud detection results</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <h4>High Accuracy</h4>
+                        <p>90%+ accuracy with XGB models</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Authentication Section -->
+            <section id="authentication" class="api-section">
+                <h2>Authentication</h2>
+                <p>All API requests require an API key to be included in the request headers.</p>
+                
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>Headers</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <pre><code class="language-http">Authorization: Bearer YOUR_API_KEY
+Content-Type: application/json</code></pre>
+                </div>
+            </section>
+            
+            <!-- Website Check Section -->
+            <section id="website-check" class="api-section">
+                <h2>Website Fraud Check</h2>
+                <p>Analyze a website for potential fraud indicators based on various parameters.</p>
+                
+                <div class="endpoint-box">
+                    <span class="method post">POST</span>
+                    <code>/website-check</code>
+                </div>
+                
+                <h3>Request Parameters</h3>
+                <div class="params-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>website_url</code></td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>The URL of the website to analyze</td>
+                            </tr>
+                            <tr>
+                                <td><code>credit_card_payment</code></td>
+                                <td>boolean</td>
+                                <td>Yes</td>
+                                <td>Presence of credit card payment option</td>
+                            </tr>
+                            <tr>
+                                <td><code>money_back_payment</code></td>
+                                <td>boolean</td>
+                                <td>Yes</td>
+                                <td>Presence of money back guarantee</td>
+                            </tr>
+                            <tr>
+                                <td><code>cash_on_delivery</code></td>
+                                <td>boolean</td>
+                                <td>Yes</td>
+                                <td>Cash on delivery payment option</td>
+                            </tr>
+                            <tr>
+                                <td><code>crypto_currency</code></td>
+                                <td>boolean</td>
+                                <td>Yes</td>
+                                <td>Cryptocurrency payment option</td>
+                            </tr>
+                            <tr>
+                                <td><code>free_contact_emails</code></td>
+                                <td>boolean</td>
+                                <td>Yes</td>
+                                <td>Use of free email services for contact</td>
+                            </tr>
+                            <tr>
+                                <td><code>logo_url</code></td>
+                                <td>boolean</td>
+                                <td>Yes</td>
+                                <td>Presence of company logo</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <h3>Example Request</h3>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>cURL</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <pre><code class="language-bash">curl -X POST http://localhost:8000/website-check \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "website_url": "https://example-shop.com",
+    "credit_card_payment": true,
+    "money_back_payment": false,
+    "cash_on_delivery": true,
+    "crypto_currency": false,
+    "free_contact_emails": true,
+    "logo_url": false
+  }'</code></pre>
+                </div>
+                
+                <h3>Example Response</h3>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>JSON</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <pre><code class="language-json">{
+  "status_code": 200,
+  "prediction": 1,
+  "confidence": 0.87,
+  "result": "fraudulent",
+  "message": "Website shows high fraud indicators",
+  "timestamp": "2025-01-06T12:55:08Z"
+}</code></pre>
+                </div>
+            </section>
+            
+            <!-- Transaction Check Section -->
+            <section id="transaction-check" class="api-section">
+                <h2>Transaction Fraud Check</h2>
+                <p>Analyze financial transactions for fraud detection using machine learning models.</p>
+                
+                <div class="endpoint-box">
+                    <span class="method post">POST</span>
+                    <code>/transaction-check</code>
+                </div>
+                
+                <h3>Request Parameters</h3>
+                <div class="params-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>amount</code></td>
+                                <td>number</td>
+                                <td>Yes</td>
+                                <td>Transaction amount</td>
+                            </tr>
+                            <tr>
+                                <td><code>oldbalanceOrg</code></td>
+                                <td>number</td>
+                                <td>Yes</td>
+                                <td>Original account balance before transaction</td>
+                            </tr>
+                            <tr>
+                                <td><code>newbalanceOrig</code></td>
+                                <td>number</td>
+                                <td>Yes</td>
+                                <td>New account balance after transaction</td>
+                            </tr>
+                            <tr>
+                                <td><code>oldbalanceDest</code></td>
+                                <td>number</td>
+                                <td>Yes</td>
+                                <td>Destination account balance before transaction</td>
+                            </tr>
+                            <tr>
+                                <td><code>newbalanceDest</code></td>
+                                <td>number</td>
+                                <td>Yes</td>
+                                <td>Destination account balance after transaction</td>
+                            </tr>
+                            <tr>
+                                <td><code>isFlaggedFraud</code></td>
+                                <td>number</td>
+                                <td>Yes</td>
+                                <td>System flag (0 or 1)</td>
+                            </tr>
+                            <tr>
+                                <td><code>type</code></td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>Transaction type: CASH_IN, CASH_OUT, DEBIT, PAYMENT, TRANSFER</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <h3>Example Request</h3>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>cURL</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <pre><code class="language-bash">curl -X POST http://localhost:8000/transaction-check \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 5000.00,
+    "oldbalanceOrg": 15000.00,
+    "newbalanceOrig": 10000.00,
+    "oldbalanceDest": 2000.00,
+    "newbalanceDest": 7000.00,
+    "isFlaggedFraud": 0,
+    "type": "TRANSFER"
+  }'</code></pre>
+                </div>
+                
+                <h3>Example Response</h3>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>JSON</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <pre><code class="language-json">{
+  "status_code": 200,
+  "prediction": 0,
+  "confidence": 0.92,
+  "result": "legitimate",
+  "message": "Transaction appears legitimate",
+  "timestamp": "2025-01-06T12:55:08Z"
+}</code></pre>
+                </div>
+            </section>
+            
+            <!-- Response Format Section -->
+            <section id="response-format" class="api-section">
+                <h2>Response Format</h2>
+                <p>All API responses follow a consistent JSON format.</p>
+                
+                <div class="params-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>status_code</code></td>
+                                <td>number</td>
+                                <td>HTTP status code (200 for success)</td>
+                            </tr>
+                            <tr>
+                                <td><code>prediction</code></td>
+                                <td>number</td>
+                                <td>0 = legitimate, 1 = fraudulent</td>
+                            </tr>
+                            <tr>
+                                <td><code>confidence</code></td>
+                                <td>number</td>
+                                <td>Confidence score (0.0 to 1.0)</td>
+                            </tr>
+                            <tr>
+                                <td><code>result</code></td>
+                                <td>string</td>
+                                <td>Human-readable result: "legitimate" or "fraudulent"</td>
+                            </tr>
+                            <tr>
+                                <td><code>message</code></td>
+                                <td>string</td>
+                                <td>Descriptive message about the result</td>
+                            </tr>
+                            <tr>
+                                <td><code>timestamp</code></td>
+                                <td>string</td>
+                                <td>ISO 8601 timestamp of the analysis</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- Error Codes Section -->
+            <section id="error-codes" class="api-section">
+                <h2>Error Codes</h2>
+                <p>The API uses standard HTTP status codes to indicate success or failure.</p>
+                
+                <div class="params-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Status Code</th>
+                                <th>Description</th>
+                                <th>Example Response</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>200</code></td>
+                                <td>Success</td>
+                                <td>Request processed successfully</td>
+                            </tr>
+                            <tr>
+                                <td><code>400</code></td>
+                                <td>Bad Request</td>
+                                <td>Invalid parameters or missing required fields</td>
+                            </tr>
+                            <tr>
+                                <td><code>401</code></td>
+                                <td>Unauthorized</td>
+                                <td>Invalid or missing API key</td>
+                            </tr>
+                            <tr>
+                                <td><code>429</code></td>
+                                <td>Rate Limited</td>
+                                <td>Too many requests, please slow down</td>
+                            </tr>
+                            <tr>
+                                <td><code>500</code></td>
+                                <td>Server Error</td>
+                                <td>Internal server error, please try again</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <h3>Error Response Format</h3>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>JSON</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <pre><code class="language-json">{
+  "status_code": 400,
+  "error": "Bad Request",
+  "message": "Missing required parameter: amount",
+  "timestamp": "2025-01-06T12:55:08Z"
+}</code></pre>
+                </div>
+            </section>
+            
+            <!-- Rate Limits Section -->
+            <section id="rate-limits" class="api-section">
+                <h2>Rate Limits</h2>
+                <p>API requests are rate limited to ensure fair usage and system stability.</p>
+                
+                <div class="info-box">
+                    <h3>Current Limits</h3>
+                    <ul>
+                        <li><strong>Free Tier:</strong> 100 requests per hour</li>
+                        <li><strong>Pro Tier:</strong> 1,000 requests per hour</li>
+                        <li><strong>Enterprise:</strong> Custom limits</li>
+                    </ul>
+                </div>
+                
+                <p>Rate limit information is included in response headers:</p>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>Headers</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <pre><code class="language-http">X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1641472800</code></pre>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="../scripts/api.js"></script>
+</body>
+</html>

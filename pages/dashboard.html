@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - FraudShield</title>
+    <link rel="stylesheet" href="../CSS/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="dashboard.html" class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>FraudShield</span>
+                </a>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active">
+                        <a href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="website-check.html">
+                            <i class="fas fa-globe"></i>
+                            <span>Website Check</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="transaction-check.html">
+                            <i class="fas fa-exchange-alt"></i>
+                            <span>Transaction Check</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="history.html">
+                            <i class="fas fa-history"></i>
+                            <span>History</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="api-key.html">
+                            <i class="fas fa-key"></i>
+                            <span>API Keys</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="#" id="logoutLink">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Navigation -->
+            <nav class="top-nav">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search...">
+                </div>
+                
+                <div class="top-nav-right">
+                    <div class="notifications">
+                        <button class="icon-button">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge">3</span>
+                        </button>
+                    </div>
+                    
+                    <div class="user-profile">
+                        <img id="userProfileIcon" src="https://robohash.org/default?set=set4&bgset=&size=32x32" alt="User Profile">
+                        <span id="userProfileName">User</span>
+                        <i class="fas fa-chevron-down"></i>
+                        
+                        <div class="dropdown-menu">
+                            <a href="profile.html">
+                                <i class="fas fa-user"></i>
+                                Profile
+                            </a>
+                            <a href="#" id="logoutDropdownLink">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Dashboard Content -->
+            <div class="dashboard-content">
+                <div class="page-header">
+                    <h1>Dashboard</h1>
+                    <div class="date-filter">
+                        <button class="btn btn-outline">
+                            <i class="fas fa-calendar"></i>
+                            Last 30 Days
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Stats Cards -->
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <div class="stat-card-content">
+                            <h3>Total Checks</h3>
+                            <div class="stat-value">1,248</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                12.5% from last month
+                            </div>
+                        </div>
+                        <div class="stat-card-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-card-content">
+                            <h3>Fraud Detected</h3>
+                            <div class="stat-value">267</div>
+                            <div class="stat-change negative">
+                                <i class="fas fa-arrow-up"></i>
+                                8.2% from last month
+                            </div>
+                        </div>
+                        <div class="stat-card-icon warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-card-content">
+                            <h3>API Calls</h3>
+                            <div class="stat-value">3,842</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                23.1% from last month
+                            </div>
+                        </div>
+                        <div class="stat-card-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-card-content">
+                            <h3>Accuracy Rate</h3>
+                            <div class="stat-value">94.8%</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                1.2% from last month
+                            </div>
+                        </div>
+                        <div class="stat-card-icon success">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Detection Tools -->
+                <div class="detection-tools">
+                    <h2>Detection Tools</h2>
+                    <div class="tool-cards">
+                        <div class="tool-card" onclick="window.location.href='website-check.html'">
+                            <div class="tool-icon">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <h3>Website Check</h3>
+                            <p>Analyze websites for potential fraud indicators</p>
+                            <div class="tool-action">
+                                <span>Start Check</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="tool-card" onclick="window.location.href='transaction-check.html'">
+                            <div class="tool-icon">
+                                <i class="fas fa-exchange-alt"></i>
+                            </div>
+                            <h3>Transaction Check</h3>
+                            <p>Detect fraudulent financial transactions</p>
+                            <div class="tool-action">
+                                <span>Start Check</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="tool-card" onclick="window.location.href='api.html'">
+                            <div class="tool-icon">
+                                <i class="fas fa-key"></i>
+                            </div>
+                            <h3>API Documentation</h3>
+                            <p>View API documentation and manage your API keys</p>
+                            <div class="tool-action">
+                                <span>View Docs</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity -->
+                <div class="recent-activity">
+                    <div class="section-header">
+                        <h2>Recent Activity</h2>
+                        <a href="history.html" class="view-all">View All</a>
+                    </div>
+                    
+                    <div class="activity-table-container">
+                        <table class="activity-table">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Target</th>
+                                    <th>Date</th>
+                                    <th>Result</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentActivityTable">
+                                <tr>
+                                    <td>
+                                        <div class="activity-type website">
+                                            <i class="fas fa-globe"></i>
+                                            Website
+                                        </div>
+                                    </td>
+                                    <td>example-shop.com</td>
+                                    <td>Today, 10:23 AM</td>
+                                    <td>
+                                        <span class="status-badge danger">Fraudulent</span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline">View Details</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="activity-type transaction">
+                                            <i class="fas fa-exchange-alt"></i>
+                                            Transaction
+                                        </div>
+                                    </td>
+                                    <td>ID: 58A72C3</td>
+                                    <td>Today, 9:45 AM</td>
+                                    <td>
+                                        <span class="status-badge success">Legitimate</span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline">View Details</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="activity-type website">
+                                            <i class="fas fa-globe"></i>
+                                            Website
+                                        </div>
+                                    </td>
+                                    <td>secure-payments.net</td>
+                                    <td>Yesterday, 4:12 PM</td>
+                                    <td>
+                                        <span class="status-badge danger">Fraudulent</span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline">View Details</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="activity-type transaction">
+                                            <i class="fas fa-exchange-alt"></i>
+                                            Transaction
+                                        </div>
+                                    </td>
+                                    <td>ID: 58A71B2</td>
+                                    <td>Yesterday, 2:30 PM</td>
+                                    <td>
+                                        <span class="status-badge success">Legitimate</span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline">View Details</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="activity-type transaction">
+                                            <i class="fas fa-exchange-alt"></i>
+                                            Transaction
+                                        </div>
+                                    </td>
+                                    <td>ID: 58A70A1</td>
+                                    <td>Yesterday, 11:15 AM</td>
+                                    <td>
+                                        <span class="status-badge warning">Suspicious</span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline">View Details</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="../scripts/dashboard.js"></script>
+</body>
+</html>
