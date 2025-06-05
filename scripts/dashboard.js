@@ -39,13 +39,22 @@ function setupEventListeners() {
     sidebarToggle.onclick = toggleSidebar
   }
 
-  // Tool card clicks
-  const toolCards = document.querySelectorAll(".tool-card")
-  toolCards.forEach((card) => {
-    card.addEventListener("click", (e) => {
-      // This is handled by the onclick attributes in HTML
-    })
-  })
+  // Modal functionality
+  const modal = document.getElementById("transactionModal")
+  const closeModal = document.getElementById("closeModal")
+
+  if (closeModal) {
+    closeModal.onclick = () => {
+      modal.style.display = "none"
+    }
+  }
+
+  // Close modal when clicking outside
+  window.onclick = (event) => {
+    if (event.target === modal) {
+      modal.style.display = "none"
+    }
+  }
 }
 
 function logout() {
@@ -61,45 +70,214 @@ function toggleSidebar() {
 }
 
 function loadDashboardData() {
-  // This would typically load real data from your API
-  // For now, we'll use the static data that's already in the HTML
-  // You can add API calls here to load real dashboard data
-  // Example:
-  // fetchDashboardStats()
-  // fetchRecentActivity()
+  fetchDashboardStats()
+  fetchRecentActivity()
 }
 
 function fetchDashboardStats() {
   const userId = localStorage.getItem("user_id")
-  const apiUrl = `http://127.0.0.1:8000/dashboard/stats/${userId}`
 
-  fetch(apiUrl, {
-    method: "GET",
+  // Simulate API call with dummy data
+  setTimeout(() => {
+    const dummyStats = {
+      total_checks: 1248,
+      api_calls: 3842,
+    }
+
+    updateStatsCards(dummyStats)
+  }, 500)
+
+  // Uncomment below for real API call
+  /*
+  fetch(`http://localhost:8000/dashboard/stats`, {
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("api_key")}`,
     },
+    body: JSON.stringify({
+      user_id: userId
+    })
   })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.status_code === 200) {
-        updateStatsCards(data.stats)
+    .then(response => response.json())
+    .then(data => {
+      updateStatsCards(data)
+    })
+    .catch(error => {
+      console.error("Error fetching stats:", error)
+      // Use dummy data as fallback
+      const dummyStats = {
+        "total_checks": 1248,
+        "api_calls": 3842
       }
+      updateStatsCards(dummyStats)
     })
-    .catch((error) => {
-      console.log("Using demo data - API not available")
-    })
+  */
 }
 
 function updateStatsCards(stats) {
-  // Update the stats cards with real data
-  const statValues = document.querySelectorAll(".stat-value")
-  if (statValues.length >= 4) {
-    statValues[0].textContent = stats.total_checks || "1,248"
-    statValues[1].textContent = stats.fraud_detected || "267"
-    statValues[2].textContent = stats.api_calls || "3,842"
-    statValues[3].textContent = stats.accuracy_rate || "94.8%"
+  const totalChecksElement = document.getElementById("totalChecks")
+  const apiCallsElement = document.getElementById("apiCalls")
+
+  if (totalChecksElement) totalChecksElement.textContent = stats.total_checks || "0"
+  if (apiCallsElement) apiCallsElement.textContent = stats.api_calls || "0"
+}
+
+function fetchRecentActivity() {
+  const userId = localStorage.getItem("user_id")
+
+  // Simulate API call with dummy data
+  setTimeout(() => {
+    const dummyActivity = [
+      {
+        type: "transaction",
+        target: "ID: 58A72C3",
+        date: "Today, 10:23 AM",
+        result: "Legitimate",
+        status: "success",
+      },
+      {
+        type: "website",
+        target: "example-shop.com",
+        date: "Today, 9:45 AM",
+        result: "Fraudulent",
+        status: "danger",
+      },
+      {
+        type: "transaction",
+        target: "ID: 58A71B2",
+        date: "Yesterday, 4:12 PM",
+        result: "Legitimate",
+        status: "success",
+      },
+      {
+        type: "transaction",
+        target: "ID: 58A70A1",
+        date: "Yesterday, 2:30 PM",
+        result: "Suspicious",
+        status: "warning",
+      },
+      {
+        type: "website",
+        target: "secure-payments.net",
+        date: "Yesterday, 11:15 AM",
+        result: "Fraudulent",
+        status: "danger",
+      },
+    ]
+
+    updateRecentActivity(dummyActivity)
+  }, 800)
+
+  // Uncomment below for real API call
+  /*
+  fetch(`http://localhost:8000/recent-activity`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      user_id: userId
+    })
+  })
+    .then(response => response.json())
+    .then(data => {
+      updateRecentActivity(data.activities)
+    })
+    .catch(error => {
+      console.error("Error fetching recent activity:", error)
+      // Use dummy data as fallback
+      updateRecentActivity(dummyActivity)
+    })
+  */
+}
+
+function updateRecentActivity(activities) {
+  const tableBody = document.getElementById("recentActivityTable")
+
+  if (!tableBody) return
+
+  tableBody.innerHTML = ""
+
+  activities.forEach((activity) => {
+    const row = document.createElement("tr")
+
+    const typeIcon = activity.type === "website" ? "fas fa-globe" : "fas fa-exchange-alt"
+    const typeClass = activity.type === "website" ? "website" : "transaction"
+
+    row.innerHTML = `
+      <td>
+        <div class="activity-type ${typeClass}">
+          <i class="${typeIcon}"></i>
+          ${activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}
+        </div>
+      </td>
+      <td>${activity.target}</td>
+      <td>${activity.date}</td>
+      <td>
+        <span class="status-badge ${activity.status}">${activity.result}</span>
+      </td>
+      <td>
+        ${
+          activity.type === "transaction"
+            ? `<button class="btn btn-sm btn-outline" onclick="showTransactionDetails('${activity.target}')">View Details</button>`
+            : `<span class="text-light">-</span>`
+        }
+      </td>
+    `
+
+    tableBody.appendChild(row)
+  })
+}
+
+function showTransactionDetails(target) {
+  // Simulate API call with dummy data
+  const dummyDetails = {
+    amount: "$2,450.00",
+    oldBalanceOrig: "$15,230.50",
+    newBalanceOrig: "$12,780.50",
+    oldBalanceDest: "$8,920.25",
+    newBalanceDest: "$11,370.25",
+    type: "TRANSFER",
+    isFraud: "No",
+    isFlaggedFraud: "No",
   }
+
+  updateTransactionModal(dummyDetails)
+
+  // Uncomment below for real API call
+  /*
+  fetch(`http://localhost:8000/transaction-details`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      target: target
+    })
+  })
+    .then(response => response.json())
+    .then(data => {
+      updateTransactionModal(data)
+    })
+    .catch(error => {
+      console.error("Error fetching transaction details:", error)
+      updateTransactionModal(dummyDetails)
+    })
+  */
+}
+
+function updateTransactionModal(details) {
+  document.getElementById("modalAmount").textContent = details.amount
+  document.getElementById("modalOldBalanceOrig").textContent = details.oldBalanceOrig
+  document.getElementById("modalNewBalanceOrig").textContent = details.newBalanceOrig
+  document.getElementById("modalOldBalanceDest").textContent = details.oldBalanceDest
+  document.getElementById("modalNewBalanceDest").textContent = details.newBalanceDest
+  document.getElementById("modalType").textContent = details.type
+  document.getElementById("modalIsFraud").textContent = details.isFraud
+  document.getElementById("modalIsFlaggedFraud").textContent = details.isFlaggedFraud
+
+  const modal = document.getElementById("transactionModal")
+  modal.style.display = "block"
 }
 
 // Handle responsive behavior
