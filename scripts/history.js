@@ -11,12 +11,15 @@ document.addEventListener("DOMContentLoaded", () => {
   loadHistoryData()
 })
 
+// Add sorting functionality and "No entries found" message
 let currentPage = 1
 let isLoading = false
 let hasMoreData = true
 let currentFilter = "all"
 let searchQuery = ""
 let allHistoryData = []
+let currentSortColumn = null
+let currentSortDirection = "asc"
 
 function displayUserInfo() {
   const userProfileNameElement = document.getElementById("userProfileName")
@@ -56,18 +59,6 @@ function setupEventListeners() {
     filterDropdown.addEventListener("click", handleFilter)
   }
 
-  // Export functionality
-  const exportButton = document.getElementById("exportButton")
-  if (exportButton) {
-    exportButton.onclick = exportHistory
-  }
-
-  // Clear history functionality
-  const clearHistoryButton = document.getElementById("clearHistoryButton")
-  if (clearHistoryButton) {
-    clearHistoryButton.onclick = clearHistory
-  }
-
   // Modal functionality
   const modal = document.getElementById("transactionModal")
   const closeModal = document.getElementById("closeModal")
@@ -90,6 +81,19 @@ function setupEventListeners() {
   if (tableWrapper) {
     tableWrapper.addEventListener("scroll", handleScroll)
   }
+
+  // Add column sorting
+  const tableHeaders = document.querySelectorAll(".history-table th")
+  tableHeaders.forEach((header, index) => {
+    if (index < 5) {
+      // Skip the Action column
+      header.style.cursor = "pointer"
+      header.addEventListener("click", () => {
+        const column = getColumnNameByIndex(index)
+        sortTable(column)
+      })
+    }
+  })
 }
 
 function logout() {
@@ -137,6 +141,57 @@ function handleFilter(event) {
 
     filterAndDisplayData()
   }
+}
+
+function getColumnNameByIndex(index) {
+  const columns = ["type", "target", "date", "result", "confidence"]
+  return columns[index]
+}
+
+function sortTable(column) {
+  if (currentSortColumn === column) {
+    // Toggle direction if clicking the same column
+    currentSortDirection = currentSortDirection === "asc" ? "desc" : "asc"
+  } else {
+    currentSortColumn = column
+    currentSortDirection = "asc"
+  }
+
+  // Update visual indicators (optional)
+  const tableHeaders = document.querySelectorAll(".history-table th")
+  tableHeaders.forEach((header) => {
+    header.classList.remove("sorted-asc", "sorted-desc")
+  })
+
+  const headerIndex = ["type", "target", "date", "result", "confidence"].indexOf(column)
+  if (headerIndex >= 0) {
+    tableHeaders[headerIndex].classList.add(currentSortDirection === "asc" ? "sorted-asc" : "sorted-desc")
+  }
+
+  // Sort the data
+  allHistoryData.sort((a, b) => {
+    let valueA = a[column]
+    let valueB = b[column]
+
+    // Special handling for dates
+    if (column === "date") {
+      // Extract date parts for comparison
+      valueA = new Date(valueA.replace("Today, ", "").replace("Yesterday, ", ""))
+      valueB = new Date(valueB.replace("Today, ", "").replace("Yesterday, ", ""))
+    }
+
+    // Compare values
+    if (valueA < valueB) {
+      return currentSortDirection === "asc" ? -1 : 1
+    }
+    if (valueA > valueB) {
+      return currentSortDirection === "asc" ? 1 : -1
+    }
+    return 0
+  })
+
+  // Redisplay the sorted data
+  displayHistoryData(allHistoryData, true)
 }
 
 function filterAndDisplayData() {
@@ -287,6 +342,15 @@ function displayHistoryData(data, clearTable = false) {
     tableBody.innerHTML = ""
   }
 
+  if (data.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="6" class="loading-row">No entries found</td>
+      </tr>
+    `
+    return
+  }
+
   data.forEach((item) => {
     const row = document.createElement("tr")
 
@@ -368,6 +432,8 @@ function showTransactionDetails(target) {
   // Simulate API call with dummy data
   const dummyDetails = {
     amount: "$" + (Math.random() * 10000 + 100).toFixed(2),
+    email: "user" + Math.floor(Math.random() * 1000) + "@example.com",
+    method: Math.random() > 0.5 ? "GUI" : "API",
     oldBalanceOrig: "$" + (Math.random() * 50000 + 1000).toFixed(2),
     newBalanceOrig: "$" + (Math.random() * 50000 + 1000).toFixed(2),
     oldBalanceDest: "$" + (Math.random() * 50000 + 1000).toFixed(2),
@@ -403,6 +469,8 @@ function showTransactionDetails(target) {
 
 function updateTransactionModal(details) {
   document.getElementById("modalAmount").textContent = details.amount
+  document.getElementById("modalEmail").textContent = details.email
+  document.getElementById("modalMethod").textContent = details.method || "GUI"
   document.getElementById("modalOldBalanceOrig").textContent = details.oldBalanceOrig
   document.getElementById("modalNewBalanceOrig").textContent = details.newBalanceOrig
   document.getElementById("modalOldBalanceDest").textContent = details.oldBalanceDest

@@ -68,26 +68,21 @@
         <main class="main-content">
             <!-- Top Navigation -->
             <nav class="top-nav">
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search...">
-                </div>
-                
-                <div class="top-nav-right">
-                    <div class="user-profile">
-                        <img id="userProfileIcon" src="https://robohash.org/default?set=set4&bgset=&size=32x32" alt="User Profile">
-                        <span id="userProfileName">User</span>
-                        <i class="fas fa-chevron-down"></i>
-                        
-                        <div class="dropdown-menu">
-                            <a href="#" id="logoutDropdownLink">
-                                <i class="fas fa-sign-out-alt"></i>
-                                Logout
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+    <div class="top-nav-right">
+        <div class="user-profile">
+            <img id="userProfileIcon" src="https://robohash.org/default?set=set4&bgset=&size=32x32" alt="User Profile">
+            <span id="userProfileName">User</span>
+            <i class="fas fa-chevron-down"></i>
+            
+            <div class="dropdown-menu">
+                <a href="#" id="logoutDropdownLink">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
             
             <!-- Dashboard Content -->
             <div class="dashboard-content">
@@ -104,6 +99,16 @@
                         </div>
                         <div class="stat-card-icon">
                             <i class="fas fa-search"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-card-content">
+                            <h3>Frauds Detected</h3>
+                            <div class="stat-value" id="fraudsDetected">Loading...</div>
+                        </div>
+                        <div class="stat-card-icon fraud-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
                         </div>
                     </div>
                     
@@ -205,6 +210,10 @@
                 <div class="detail-row">
                     <span class="detail-label">Email:</span>
                     <span class="detail-value" id="modalEmail">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Method:</span>
+                    <span class="detail-value" id="modalMethod">-</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Old Balance (Origin):</span>

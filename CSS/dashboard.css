@@ -181,34 +181,12 @@ ul {
 
 .top-nav {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   padding: 1rem 2rem;
   background-color: var(--background-color);
   border-bottom: 1px solid var(--border-color);
   height: var(--header-height);
-}
-
-.search-bar {
-  position: relative;
-  max-width: 400px;
-  flex: 1;
-}
-
-.search-bar i {
-  position: absolute;
-  left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-light);
-}
-
-.search-bar input {
-  width: 100%;
-  padding: 0.5rem 1rem 0.5rem 2.5rem;
-  border: 1px solid var(--border-color);
-  border-radius: 0.375rem;
-  background-color: var(--background-alt);
 }
 
 .top-nav-right {
@@ -367,6 +345,15 @@ ul {
   justify-content: center;
   background-color: var(--primary-light);
   color: var(--primary-color);
+}
+
+.stat-card-icon.fraud-icon {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--danger-color);
+}
+
+.stat-card-icon.fraud-icon i {
+  color: var(--danger-color);
 }
 
 .stat-card-icon i {
@@ -636,10 +623,6 @@ ul {
 
   .top-nav {
     padding: 1rem;
-  }
-
-  .search-bar {
-    max-width: 200px;
   }
 
   .stats-cards {

@@ -49,157 +49,154 @@
                     </li>
                     <li>
                         <a href="api.html">
-                            <i class="fas fa-key"></i>
-                            <span>API Keys</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-            
-            <div class="sidebar-footer">
-                <a href="#" id="logoutLink">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </a>
-            </div>
-        </aside>
+                        <i class="fas fa-key"></i>
+                        <span>API Keys</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
         
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Top Navigation -->
-            <nav class="top-nav">
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search...">
-                </div>
-                
-                <div class="top-nav-right">
-                    <div class="user-profile">
-                        <img id="userProfileIcon" src="https://robohash.org/default?set=set4&bgset=&size=32x32" alt="User Profile">
-                        <span id="userProfileName">User</span>
-                        <i class="fas fa-chevron-down"></i>
-                        
-                        <div class="dropdown-menu">
-                            <a href="#" id="logoutDropdownLink">
-                                <i class="fas fa-sign-out-alt"></i>
-                                Logout
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+        <div class="sidebar-footer">
+            <a href="#" id="logoutLink">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Navigation -->
+        <nav class="top-nav">
+            <div class="nav-spacer"></div>
             
-            <!-- Transaction Check Content -->
-            <div class="transaction-check-content">
-                <div class="page-header">
-                    <h1>Transaction Check</h1>
-                </div>
-                
-                <div class="check-card">
-                    <div class="card-header">
-                        <h2>Check Transaction for Fraud</h2>
-                        <p>Enter transaction details to analyze for potential fraud.</p>
+            <div class="top-nav-right">
+                <div class="user-profile">
+                    <img id="userProfileIcon" src="https://robohash.org/default?set=set4&bgset=&size=32x32" alt="User Profile">
+                    <span id="userProfileName">User</span>
+                    <i class="fas fa-chevron-down"></i>
+                    
+                    <div class="dropdown-menu">
+                        <a href="#" id="logoutDropdownLink">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </a>
                     </div>
-
-                    <form id="predictionForm" class="check-form">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="amount">Amount</label>
-                                <div class="input-with-icon">
-                                    <i class="fas fa-dollar-sign"></i>
-                                    <input type="number" id="amount" name="amount" placeholder="Transaction amount" required step="0.01">
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="clientMail">Email Address</label>
-                                <div class="input-with-icon">
-                                    <i class="fas fa-envelope"></i>
-                                    <input type="email" id="clientMail" name="clientMail" placeholder="Client email address" required>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="oldbalanceOrg">Old Balance (Origin)</label>
-                                <div class="input-with-icon">
-                                    <i class="fas fa-wallet"></i>
-                                    <input type="number" id="oldbalanceOrg" name="oldbalanceOrg" placeholder="Original old balance" required step="0.01">
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="newbalanceOrig">New Balance (Origin)</label>
-                                <div class="input-with-icon">
-                                    <i class="fas fa-wallet"></i>
-                                    <input type="number" id="newbalanceOrig" name="newbalanceOrig" placeholder="Original new balance" required step="0.01">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="oldbalanceDest">Old Balance (Destination)</label>
-                                <div class="input-with-icon">
-                                    <i class="fas fa-wallet"></i>
-                                    <input type="number" id="oldbalanceDest" name="oldbalanceDest" placeholder="Destination old balance" required step="0.01">
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="newbalanceDest">New Balance (Destination)</label>
-                                <div class="input-with-icon">
-                                    <i class="fas fa-wallet"></i>
-                                    <input type="number" id="newbalanceDest" name="newbalanceDest" placeholder="Destination new balance" required step="0.01">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="transactionType">Transaction Type</label>
-                                <div class="select-wrapper">
-                                    <select id="transactionType" name="transactionType" required>
-                                        <option value="" disabled selected>Select transaction type</option>
-                                        <option value="CASH_IN">CASH IN</option>
-                                        <option value="CASH_OUT">CASH OUT</option>
-                                        <option value="DEBIT">DEBIT</option>
-                                        <option value="PAYMENT">PAYMENT</option>
-                                        <option value="TRANSFER">TRANSFER</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="form-group checkbox-container">
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="isFlaggedFraud" name="isFlaggedFraud">
-                                    <label for="isFlaggedFraud">Is Flagged as Fraud</label>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-search"></i>
-                                Predict Fraud
-                            </button>
-                            <button type="reset" class="btn btn-outline">
-                                <i class="fas fa-redo"></i>
-                                Reset
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                
-                <!-- Prediction Result (initially hidden) -->
-                <div id="predictionResult" class="result-display" style="display: none;">
-                    <!-- Content will be dynamically added here -->
                 </div>
             </div>
-        </main>
-    </div>
-    
-    <script src="../scripts/transaction-check.js"></script>
+        </nav>
+        
+        <!-- Transaction Check Content -->
+        <div class="transaction-check-content">
+            <div class="page-header">
+                <h1>Transaction Check</h1>
+            </div>
+            
+            <div class="check-card">
+                <div class="card-header">
+                    <h2>Check Transaction for Fraud</h2>
+                    <p>Enter transaction details to analyze for potential fraud.</p>
+                </div>
+
+                <form id="predictionForm" class="check-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="amount">Amount</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-dollar-sign"></i>
+                                <input type="number" id="amount" name="amount" placeholder="Transaction amount" required step="0.01">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="clientMail">Email Address</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-envelope"></i>
+                                <input type="email" id="clientMail" name="clientMail" placeholder="Client email address" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="oldbalanceOrg">Old Balance (Origin)</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-wallet"></i>
+                                <input type="number" id="oldbalanceOrg" name="oldbalanceOrg" placeholder="Original old balance" required step="0.01">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="newbalanceOrig">New Balance (Origin)</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-wallet"></i>
+                                <input type="number" id="newbalanceOrig" name="newbalanceOrig" placeholder="Original new balance" required step="0.01">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="oldbalanceDest">Old Balance (Destination)</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-wallet"></i>
+                                <input type="number" id="oldbalanceDest" name="oldbalanceDest" placeholder="Destination old balance" required step="0.01">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="newbalanceDest">New Balance (Destination)</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-wallet"></i>
+                                <input type="number" id="newbalanceDest" name="newbalanceDest" placeholder="Destination new balance" required step="0.01">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="transactionType">Transaction Type</label>
+                            <div class="select-wrapper">
+                                <select id="transactionType" name="transactionType" required>
+                                    <option value="" disabled selected>Select transaction type</option>
+                                    <option value="CASH_IN">CASH IN</option>
+                                    <option value="CASH_OUT">CASH OUT</option>
+                                    <option value="DEBIT">DEBIT</option>
+                                    <option value="PAYMENT">PAYMENT</option>
+                                    <option value="TRANSFER">TRANSFER</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group checkbox-container">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="isFlaggedFraud" name="isFlaggedFraud">
+                                <label for="isFlaggedFraud">Is Flagged as Fraud</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i>
+                            Predict Fraud
+                        </button>
+                        <button type="reset" class="btn btn-outline">
+                            <i class="fas fa-redo"></i>
+                            Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Prediction Result (initially hidden) -->
+            <div id="predictionResult" class="result-display" style="display: none;">
+                <!-- Content will be dynamically added here -->
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="../scripts/transaction-check.js"></script>
 </body>
 </html>

@@ -34,9 +34,16 @@
             <div class="api-key-section">
                 <h4>Your API Key</h4>
                 <div class="api-key-display">
-                    <code id="apiKeyDisplay">Loading...</code>
-                    <button id="copyApiKey" class="copy-btn" title="Copy API Key">
+                    <code id="apiKeyText">Loading...</code>
+                    <button id="copyApiKeyButton" class="copy-btn" title="Copy API Key">
                         <i class="fas fa-copy"></i>
+                        <span id="copyButtonText" class="copy-text">Copy</span>
+                    </button>
+                </div>
+                <div class="api-key-actions">
+                    <button id="regenerateApiKeyButton" class="btn btn-outline btn-sm">
+                        <i class="fas fa-sync-alt"></i>
+                        Regenerate
                     </button>
                 </div>
                 <p class="api-key-note">Keep your API key secure and don't share it publicly.</p>

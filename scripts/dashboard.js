@@ -77,118 +77,101 @@ function loadDashboardData() {
 function fetchDashboardStats() {
   const userId = localStorage.getItem("user_id")
 
-  // Simulate API call with dummy data
-  setTimeout(() => {
-    const dummyStats = {
-      total_checks: 1248,
-      api_calls: 3842,
-    }
-
-    updateStatsCards(dummyStats)
-  }, 500)
-
   // Uncomment below for real API call
-  /*
   fetch(`http://localhost:8000/dashboard/stats`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      user_id: userId
-    })
+      user_id: userId,
+    }),
   })
-    .then(response => response.json())
-    .then(data => {
+    .then((response) => response.json())
+    .then((data) => {
       updateStatsCards(data)
     })
-    .catch(error => {
+    .catch((error) => {
       console.error("Error fetching stats:", error)
       // Use dummy data as fallback
       const dummyStats = {
-        "total_checks": 1248,
-        "api_calls": 3842
+        total_checks: 0,
+        frauds_detected: 0,
+        api_calls: 0,
       }
       updateStatsCards(dummyStats)
     })
-  */
 }
 
 function updateStatsCards(stats) {
   const totalChecksElement = document.getElementById("totalChecks")
+  const fraudsDetectedElement = document.getElementById("fraudsDetected")
   const apiCallsElement = document.getElementById("apiCalls")
 
   if (totalChecksElement) totalChecksElement.textContent = stats.total_checks || "0"
+  if (fraudsDetectedElement) fraudsDetectedElement.textContent = stats.frauds_detected || "0"
   if (apiCallsElement) apiCallsElement.textContent = stats.api_calls || "0"
 }
 
 function fetchRecentActivity() {
   const userId = localStorage.getItem("user_id")
 
-  // Simulate API call with dummy data
-  setTimeout(() => {
-    const dummyActivity = [
-      {
-        type: "transaction",
-        target: "ID: 58A72C3",
-        date: "Today, 10:23 AM",
-        result: "Legitimate",
-        status: "success",
-      },
-      {
-        type: "website",
-        target: "example-shop.com",
-        date: "Today, 9:45 AM",
-        result: "Fraudulent",
-        status: "danger",
-      },
-      {
-        type: "transaction",
-        target: "ID: 58A71B2",
-        date: "Yesterday, 4:12 PM",
-        result: "Legitimate",
-        status: "success",
-      },
-      {
-        type: "transaction",
-        target: "ID: 58A70A1",
-        date: "Yesterday, 2:30 PM",
-        result: "Suspicious",
-        status: "warning",
-      },
-      {
-        type: "website",
-        target: "secure-payments.net",
-        date: "Yesterday, 11:15 AM",
-        result: "Fraudulent",
-        status: "danger",
-      },
-    ]
-
-    updateRecentActivity(dummyActivity)
-  }, 800)
-
   // Uncomment below for real API call
-  /*
   fetch(`http://localhost:8000/recent-activity`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      user_id: userId
-    })
+      user_id: userId,
+    }),
   })
-    .then(response => response.json())
-    .then(data => {
+    .then((response) => response.json())
+    .then((data) => {
       updateRecentActivity(data.activities)
     })
-    .catch(error => {
+    .catch((error) => {
       console.error("Error fetching recent activity:", error)
       // Use dummy data as fallback
+      const dummyActivity = [
+        {
+          type: "transaction",
+          target: "ID: 58A72C3",
+          date: "Today, 10:23 AM",
+          result: "Legitimate",
+          status: "success",
+        },
+        {
+          type: "website",
+          target: "example-shop.com",
+          date: "Today, 9:45 AM",
+          result: "Fraudulent",
+          status: "danger",
+        },
+        {
+          type: "transaction",
+          target: "ID: 58A71B2",
+          date: "Yesterday, 4:12 PM",
+          result: "Legitimate",
+          status: "success",
+        },
+        {
+          type: "transaction",
+          target: "ID: 58A70A1",
+          date: "Yesterday, 2:30 PM",
+          result: "Suspicious",
+          status: "warning",
+        },
+        {
+          type: "website",
+          target: "secure-payments.net",
+          date: "Yesterday, 11:15 AM",
+          result: "Fraudulent",
+          status: "danger",
+        },
+      ]
       updateRecentActivity(dummyActivity)
     })
-  */
 }
 
 function updateRecentActivity(activities) {
@@ -229,10 +212,13 @@ function updateRecentActivity(activities) {
   })
 }
 
+// Update showTransactionDetails function to include method
 function showTransactionDetails(target) {
   // Simulate API call with dummy data
   const dummyDetails = {
     amount: "$2,450.00",
+    email: "user" + Math.floor(Math.random() * 1000) + "@example.com",
+    method: Math.random() > 0.5 ? "GUI" : "API",
     oldBalanceOrig: "$15,230.50",
     newBalanceOrig: "$12,780.50",
     oldBalanceDest: "$8,920.25",
@@ -268,6 +254,8 @@ function showTransactionDetails(target) {
 
 function updateTransactionModal(details) {
   document.getElementById("modalAmount").textContent = details.amount
+  document.getElementById("modalEmail").textContent = details.email
+  document.getElementById("modalMethod").textContent = details.method || "GUI"
   document.getElementById("modalOldBalanceOrig").textContent = details.oldBalanceOrig
   document.getElementById("modalNewBalanceOrig").textContent = details.newBalanceOrig
   document.getElementById("modalOldBalanceDest").textContent = details.oldBalanceDest
