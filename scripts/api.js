@@ -80,7 +80,7 @@ function generate_new_key() {
   regenerateButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...'
   regenerateButton.disabled = true
 
-  const api_url = "http://127.0.0.1:8000/regenerate_key"
+  const api_url = "https://ecommerce-transaction-fraud-detection.onrender.com/regenerate_key"
   fetch(api_url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
