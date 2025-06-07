@@ -104,6 +104,8 @@ function handleWebsiteCheck(event) {
     requestData.logo_url = null
   }
 
+  console.log("Request data being sent:", requestData)
+
   // Show results section with loading state
   const resultCard = document.getElementById("websiteCheckResult")
   resultCard.style.display = "block"
@@ -140,28 +142,55 @@ function handleWebsiteCheck(event) {
   })
     .then((response) => response.json())
     .then((data) => {
+      console.log("Raw backend response:", data)
       updateWebsiteCheckResults(data, websiteUrl)
     })
     .catch((error) => {
       console.error("Error checking website:", error)
-      // Generate dummy data as fallback
-      const confidence = Math.floor(Math.random() * 100)
-      const dummyData = {
-        Prediction: confidence > 50 ? 1 : 0,
-        Confidence: confidence,
-      }
-      updateWebsiteCheckResults(dummyData, websiteUrl)
+      // Don't generate dummy data - show the actual error
+      updateWebsiteCheckResults(null, websiteUrl, error.message)
     })
 }
 
-function updateWebsiteCheckResults(data, websiteUrl) {
+function updateWebsiteCheckResults(data, websiteUrl, errorMessage = null) {
+  console.log("Processing results with data:", data)
+
+  // Handle error case
+  if (errorMessage || !data) {
+    console.log("Handling error case:", errorMessage)
+    const statusBadge = document.getElementById("resultStatusBadge")
+    if (statusBadge) {
+      statusBadge.className = "status-badge error"
+      const statusTextElement = document.getElementById("resultStatusText")
+      if (statusTextElement) {
+        statusTextElement.textContent = "Analysis Failed"
+      }
+      const iconElement = statusBadge.querySelector("i")
+      if (iconElement) {
+        iconElement.className = "fas fa-exclamation-triangle"
+      }
+    }
+
+    const factorsList = document.getElementById("resultFactorsList")
+    if (factorsList) {
+      factorsList.innerHTML = `<li class="risk-factor">Error: ${errorMessage || "Unable to analyze website"}</li>`
+    }
+    return
+  }
+
   const prediction = data.Prediction
   const confidence = data.Confidence
 
-  // Determine status based on prediction
+  console.log("Extracted values - Prediction:", prediction, "Confidence:", confidence)
+  console.log("Prediction type:", typeof prediction, "Confidence type:", typeof confidence)
+
+  // Determine status based on prediction (0 = not fraudulent, 1 = fraudulent)
   let status, statusText, statusIcon, factors
 
+  console.log("Checking prediction value:", prediction)
+
   if (prediction === 1) {
+    console.log("Setting as FRAUDULENT")
     status = "fraudulent"
     statusText = "Fraudulent - High Risk"
     statusIcon = "fas fa-times-circle"
@@ -172,7 +201,8 @@ function updateWebsiteCheckResults(data, websiteUrl) {
       { type: "risk", text: "SSL certificate is missing or invalid" },
       { type: "risk", text: "Multiple reports of fraudulent activity" },
     ]
-  } else {
+  } else if (prediction === 0) {
+    console.log("Setting as SAFE")
     status = "safe"
     statusText = "Safe - Low Risk"
     statusIcon = "fas fa-check-circle"
@@ -182,78 +212,99 @@ function updateWebsiteCheckResults(data, websiteUrl) {
       { type: "safe", text: "No reports of fraudulent activity" },
       { type: "safe", text: "Contact information is clearly displayed" },
     ]
+  } else {
+    console.log("Unknown prediction value, defaulting to SAFE")
+    status = "safe"
+    statusText = "Safe - Low Risk"
+    statusIcon = "fas fa-check-circle"
+    factors = [{ type: "safe", text: "Analysis completed - no fraud indicators detected" }]
   }
+
+  console.log("Final status:", status, "statusText:", statusText)
 
   // Update status badge
   const statusBadge = document.getElementById("resultStatusBadge")
-  statusBadge.className = `status-badge ${status}`
-  document.getElementById("resultStatusText").textContent = statusText
+  if (statusBadge) {
+    statusBadge.className = `status-badge ${status}`
+    const statusTextElement = document.getElementById("resultStatusText")
+    if (statusTextElement) {
+      statusTextElement.textContent = statusText
+    }
 
-  // Replace spinner with appropriate icon
-  const iconElement = statusBadge.querySelector("i")
-  if (iconElement) {
-    iconElement.className = statusIcon
+    // Replace spinner with appropriate icon
+    const iconElement = statusBadge.querySelector("i")
+    if (iconElement) {
+      iconElement.className = statusIcon
+    }
   }
 
-  // Update score bar
+  // Use raw confidence value from backend
+  const rawConfidence = confidence
+  console.log("Using raw confidence:", rawConfidence)
+
+  // Fix color logic: Green for safe websites, red only for fraudulent websites
+  let confidenceClass = "low" // This will be green
+  if (prediction === 1) {
+    // Only use red colors for fraudulent websites
+    if (rawConfidence >= 70) {
+      confidenceClass = "high" // red
+    } else if (rawConfidence >= 30) {
+      confidenceClass = "medium" // yellow
+    } else {
+      confidenceClass = "low" // green
+    }
+  }
+  // For safe websites (prediction === 0), always use green (low class)
+
+  console.log("Confidence class:", confidenceClass)
+
+  // Update score bar with fixed color logic
   const scoreBar = document.getElementById("resultScoreBar")
-  scoreBar.style.width = `${confidence}%`
-  document.getElementById("resultScoreValue").textContent = `${Number.parseFloat(confidence).toFixed(2)}%`
+  const scoreValue = document.getElementById("resultScoreValue")
 
-  if (confidence < 30) {
-    scoreBar.className = "score-fill"
-  } else if (confidence < 70) {
-    scoreBar.className = "score-fill medium"
-  } else {
-    scoreBar.className = "score-fill high"
+  if (scoreBar) {
+    scoreBar.style.width = `${rawConfidence}%`
+    scoreBar.className = `score-fill ${confidenceClass}`
   }
 
-  // Add confidence display
-  const resultContent = document.querySelector(".result-content")
-  let confidenceClass = "low"
-  let interpretation = ""
-
-  if (confidence < 30) {
-    confidenceClass = "low"
-    interpretation = "Low confidence - Website appears safe"
-  } else if (confidence < 70) {
-    confidenceClass = "medium"
-    interpretation = "Medium confidence - Website requires attention"
-  } else {
-    confidenceClass = "high"
-    interpretation = "High confidence - Website likely fraudulent"
+  if (scoreValue) {
+    scoreValue.textContent = `${rawConfidence}%`
   }
 
-  // Check if confidence display already exists
-  let confidenceDisplay = resultContent.querySelector(".confidence-display")
-  if (!confidenceDisplay) {
-    confidenceDisplay = document.createElement("div")
-    confidenceDisplay.className = "confidence-display"
-    resultContent.insertBefore(confidenceDisplay, resultContent.querySelector(".result-factors"))
+  // Update the label from "Risk Score" to "Confidence Score"
+  const scoreLabel = document.querySelector(".result-score .result-label")
+  if (scoreLabel) {
+    scoreLabel.textContent = "Confidence Score:"
   }
 
-  const formattedConfidence = Number.parseFloat(confidence).toFixed(2)
-  confidenceDisplay.innerHTML = `
-  <div class="confidence-header">
-    <span class="confidence-label">Fraud Confidence Score</span>
-    <span class="confidence-value ${confidenceClass}">${formattedConfidence}%</span>
-  </div>
-  <div class="confidence-bar">
-    <div class="confidence-fill ${confidenceClass}" style="width: ${confidence}%"></div>
-  </div>
-  <div class="confidence-interpretation">${interpretation}</div>
-`
+  // Remove any existing confidence display to avoid duplicates
+  try {
+    const resultContent = document.querySelector(".result-content")
+    if (resultContent) {
+      const existingConfidenceDisplay = resultContent.querySelector(".confidence-display")
+      if (existingConfidenceDisplay) {
+        console.log("Removing duplicate confidence display")
+        existingConfidenceDisplay.remove()
+      }
+    }
+  } catch (domError) {
+    console.error("Error removing duplicate confidence display:", domError)
+  }
 
-  // Update factors list - CLEAR FIRST to remove "analyzing" text
+  // Update factors list
   const factorsList = document.getElementById("resultFactorsList")
-  factorsList.innerHTML = ""
+  if (factorsList) {
+    factorsList.innerHTML = ""
 
-  factors.forEach((factor) => {
-    const li = document.createElement("li")
-    li.textContent = factor.text
-    li.className = factor.type === "risk" ? "risk-factor" : "safe-factor"
-    factorsList.appendChild(li)
-  })
+    factors.forEach((factor) => {
+      const li = document.createElement("li")
+      li.textContent = factor.text
+      li.className = factor.type === "risk" ? "risk-factor" : "safe-factor"
+      factorsList.appendChild(li)
+    })
+  }
+
+  console.log("Results update completed")
 }
 
 // Handle responsive behavior

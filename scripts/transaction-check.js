@@ -69,7 +69,7 @@ function predict(event) {
   const isFlaggedFraud = document.getElementById("isFlaggedFraud").checked ? 1.0 : 0.0
   const type = document.getElementById("transactionType").value
 
-  console.log(
+  console.log("Form data collected:", {
     user_id,
     type,
     amount,
@@ -79,7 +79,7 @@ function predict(event) {
     newbalanceDest,
     isFlaggedFraud,
     mail,
-  )
+  })
 
   // Show loading state
   const predictionResultDiv = document.getElementById("predictionResult")
@@ -108,6 +108,8 @@ function predict(event) {
     mail,
   }
 
+  console.log("Request data being sent:", requestData)
+
   // Make API call
   fetch("http://127.0.0.1:8000/predict/transaction", {
     method: "POST",
@@ -118,23 +120,26 @@ function predict(event) {
   })
     .then((response) => response.json())
     .then((data) => {
+      console.log("Raw backend response:", data)
       displayPredictionResult(data.Prediction, mail, data.Confidence)
     })
     .catch((error) => {
       console.error("Error:", error)
-      // Generate dummy data as fallback
-      const confidence = Math.floor(Math.random() * 100)
-      const prediction = confidence > 50 ? 1 : 0
-      displayPredictionResult(prediction, mail, confidence)
+      // Show error instead of dummy data
+      displayPredictionResult(null, mail, null, error.message)
     })
 }
 
 function displayPredictionResult(prediction, mail, confidence, errorMessage = "") {
+  console.log("Processing transaction results with:", { prediction, mail, confidence, errorMessage })
+  console.log("Prediction type:", typeof prediction, "Confidence type:", typeof confidence)
+
   const predictionResultDiv = document.getElementById("predictionResult")
   predictionResultDiv.style.display = "block"
   predictionResultDiv.className = "result-display"
 
   if (errorMessage) {
+    console.log("Displaying error message:", errorMessage)
     predictionResultDiv.classList.add("error")
     predictionResultDiv.innerHTML = `
       <div style="text-align: center; padding: 1rem;">
@@ -147,46 +152,60 @@ function displayPredictionResult(prediction, mail, confidence, errorMessage = ""
   }
 
   let resultClass, resultIcon, resultTitle, resultDescription
-  let confidenceClass = "low"
+  let confidenceClass = "low" // Default to green
   let interpretation = ""
 
-  if (confidence !== null) {
-    if (prediction === 1) {
-      // Only show red colors for fraudulent transactions
-      if (confidence < 30) {
-        confidenceClass = "low"
-        interpretation = "Low confidence fraud detection"
-      } else if (confidence < 70) {
-        confidenceClass = "medium"
-        interpretation = "Medium confidence fraud detection"
-      } else {
-        confidenceClass = "high"
-        interpretation = "High confidence fraud detection"
-      }
-    } else {
-      // For legitimate transactions, always use green/low
-      confidenceClass = "low"
-      interpretation = "Transaction appears legitimate"
-    }
-  }
+  // Use raw confidence value from backend
+  const rawConfidence = confidence
+  console.log("Using raw confidence:", rawConfidence)
+
+  // Set result based on prediction value (0 = not fraudulent, 1 = fraudulent)
+  console.log("Checking prediction value:", prediction)
 
   if (prediction === 1) {
+    console.log("Setting as FRAUDULENT")
     resultClass = "scam"
     resultIcon = "fas fa-exclamation-triangle"
     resultTitle = "FRAUDULENT TRANSACTION DETECTED!"
     resultDescription = "This transaction has been flagged as potentially fraudulent."
+
+    // Only use red/yellow colors for fraudulent transactions
+    if (rawConfidence >= 70) {
+      confidenceClass = "high" // red
+    } else if (rawConfidence >= 30) {
+      confidenceClass = "medium" // yellow
+    } else {
+      confidenceClass = "low" // green
+    }
+    interpretation = `${confidenceClass.charAt(0).toUpperCase() + confidenceClass.slice(1)} confidence fraud detection`
   } else if (prediction === 0) {
+    console.log("Setting as LEGITIMATE")
     resultClass = "not-scam"
     resultIcon = "fas fa-check-circle"
     resultTitle = "Transaction Appears Legitimate"
     resultDescription = "This transaction does not show signs of fraud."
+
+    // For legitimate transactions, always use green
+    confidenceClass = "low" // green
+    interpretation = "High confidence - Transaction appears legitimate"
+  } else {
+    console.log("Unknown prediction value, defaulting to LEGITIMATE")
+    resultClass = "not-scam"
+    resultIcon = "fas fa-check-circle"
+    resultTitle = "Transaction Appears Legitimate"
+    resultDescription = "This transaction does not show signs of fraud."
+    confidenceClass = "low" // green
+    interpretation = "Transaction appears legitimate"
   }
+
+  console.log("Final result class:", resultClass, "Title:", resultTitle)
 
   predictionResultDiv.classList.add(resultClass)
 
   // Only show email notification for fraudulent transactions
   let emailNotification = ""
   if (mail && prediction === 1) {
+    console.log("Adding email notification for fraudulent transaction")
     emailNotification = `
       <div class="email-notification">
         <i class="fas fa-envelope"></i>
@@ -196,20 +215,22 @@ function displayPredictionResult(prediction, mail, confidence, errorMessage = ""
   }
 
   let confidenceDisplay = ""
-  if (confidence !== null) {
-    const formattedConfidence = Number.parseFloat(confidence).toFixed(2)
+  if (rawConfidence !== null && rawConfidence !== undefined) {
+    console.log("Creating confidence display with value:", rawConfidence)
     confidenceDisplay = `
       <div class="confidence-display">
         <div class="confidence-header">
-          <span class="confidence-label">Fraud Confidence Score</span>
-          <span class="confidence-value ${confidenceClass}">${formattedConfidence}%</span>
+          <span class="confidence-label">Confidence Score</span>
+          <span class="confidence-value ${confidenceClass}">${rawConfidence}%</span>
         </div>
         <div class="confidence-bar">
-          <div class="confidence-fill ${confidenceClass}" style="width: ${confidence}%"></div>
+          <div class="confidence-fill ${confidenceClass}" style="width: ${rawConfidence}%"></div>
         </div>
         <div class="confidence-interpretation">${interpretation}</div>
       </div>
     `
+  } else {
+    console.log("Confidence value is null/undefined, not showing confidence display")
   }
 
   predictionResultDiv.innerHTML = `
@@ -221,4 +242,6 @@ function displayPredictionResult(prediction, mail, confidence, errorMessage = ""
       ${confidenceDisplay}
     </div>
   `
+
+  console.log("Transaction results display completed")
 }
