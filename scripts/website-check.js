@@ -126,9 +126,6 @@ function handleWebsiteCheck(event) {
   document.getElementById("resultScoreBar").className = "score-fill"
   document.getElementById("resultScoreValue").textContent = "0%"
 
-  // Reset factors list
-  document.getElementById("resultFactorsList").innerHTML = '<li class="loading">Analyzing website...</li>'
-
   // Scroll to results
   resultCard.scrollIntoView({ behavior: "smooth" })
 
@@ -170,11 +167,6 @@ function updateWebsiteCheckResults(data, websiteUrl, errorMessage = null) {
         iconElement.className = "fas fa-exclamation-triangle"
       }
     }
-
-    const factorsList = document.getElementById("resultFactorsList")
-    if (factorsList) {
-      factorsList.innerHTML = `<li class="risk-factor">Error: ${errorMessage || "Unable to analyze website"}</li>`
-    }
     return
   }
 
@@ -185,7 +177,7 @@ function updateWebsiteCheckResults(data, websiteUrl, errorMessage = null) {
   console.log("Prediction type:", typeof prediction, "Confidence type:", typeof confidence)
 
   // Determine status based on prediction (0 = not fraudulent, 1 = fraudulent)
-  let status, statusText, statusIcon, factors
+  let status, statusText, statusIcon
 
   console.log("Checking prediction value:", prediction)
 
@@ -194,30 +186,16 @@ function updateWebsiteCheckResults(data, websiteUrl, errorMessage = null) {
     status = "fraudulent"
     statusText = "Fraudulent - High Risk"
     statusIcon = "fas fa-times-circle"
-    factors = [
-      { type: "risk", text: "Domain was registered very recently (less than 1 month ago)" },
-      { type: "risk", text: "Uses free email service for business contact" },
-      { type: "risk", text: "No physical address provided" },
-      { type: "risk", text: "SSL certificate is missing or invalid" },
-      { type: "risk", text: "Multiple reports of fraudulent activity" },
-    ]
   } else if (prediction === 0) {
     console.log("Setting as SAFE")
     status = "safe"
     statusText = "Safe - Low Risk"
     statusIcon = "fas fa-check-circle"
-    factors = [
-      { type: "safe", text: "Domain has been registered for over 2 years" },
-      { type: "safe", text: "SSL certificate is valid and up to date" },
-      { type: "safe", text: "No reports of fraudulent activity" },
-      { type: "safe", text: "Contact information is clearly displayed" },
-    ]
   } else {
     console.log("Unknown prediction value, defaulting to SAFE")
     status = "safe"
     statusText = "Safe - Low Risk"
     statusIcon = "fas fa-check-circle"
-    factors = [{ type: "safe", text: "Analysis completed - no fraud indicators detected" }]
   }
 
   console.log("Final status:", status, "statusText:", statusText)
@@ -275,33 +253,6 @@ function updateWebsiteCheckResults(data, websiteUrl, errorMessage = null) {
   const scoreLabel = document.querySelector(".result-score .result-label")
   if (scoreLabel) {
     scoreLabel.textContent = "Confidence Score:"
-  }
-
-  // Remove any existing confidence display to avoid duplicates
-  try {
-    const resultContent = document.querySelector(".result-content")
-    if (resultContent) {
-      const existingConfidenceDisplay = resultContent.querySelector(".confidence-display")
-      if (existingConfidenceDisplay) {
-        console.log("Removing duplicate confidence display")
-        existingConfidenceDisplay.remove()
-      }
-    }
-  } catch (domError) {
-    console.error("Error removing duplicate confidence display:", domError)
-  }
-
-  // Update factors list
-  const factorsList = document.getElementById("resultFactorsList")
-  if (factorsList) {
-    factorsList.innerHTML = ""
-
-    factors.forEach((factor) => {
-      const li = document.createElement("li")
-      li.textContent = factor.text
-      li.className = factor.type === "risk" ? "risk-factor" : "safe-factor"
-      factorsList.appendChild(li)
-    })
   }
 
   console.log("Results update completed")

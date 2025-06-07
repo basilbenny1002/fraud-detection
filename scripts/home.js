@@ -16,6 +16,24 @@ document.addEventListener("DOMContentLoaded", () => {
     dashboardLink.style.display = "none"
   }
 
+  // Handle CTA section buttons based on login status
+  const ctaButtons = document.querySelector(".cta-buttons")
+  if (ctaButtons) {
+    if (userId && userName) {
+      // User is logged in, show dashboard button instead of signup
+      ctaButtons.innerHTML = `
+        <a href="dashboard.html" class="btn btn-primary btn-large">Go to Dashboard</a>
+        <a href="api.html" class="btn btn-outline btn-large">View API Docs</a>
+      `
+    } else {
+      // User is not logged in, show signup button
+      ctaButtons.innerHTML = `
+        <a href="signup.html" class="btn btn-primary btn-large">Sign Up Now</a>
+        <a href="api.html" class="btn btn-outline btn-large">View API Docs</a>
+      `
+    }
+  }
+
   // Smooth scrolling for anchor links
   document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
     anchor.addEventListener("click", function (e) {

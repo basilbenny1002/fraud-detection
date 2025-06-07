@@ -147,20 +147,31 @@ function setupNavigation() {
   // Handle click navigation
   navLinks.forEach((link) => {
     link.addEventListener("click", (e) => {
-      e.preventDefault()
-      const targetId = link.getAttribute("href").substring(1)
-      const targetSection = document.getElementById(targetId)
+      const href = link.getAttribute("href")
 
-      if (targetSection) {
-        targetSection.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        })
+      // Only prevent default for anchor links (starting with #)
+      // Allow normal navigation for external links like dashboard.html
+      if (href && href.startsWith("#")) {
+        e.preventDefault()
+        const targetId = href.substring(1)
+        const targetSection = document.getElementById(targetId)
 
-        // Update active state
-        navLinks.forEach((l) => l.classList.remove("active"))
-        link.classList.add("active")
+        if (targetSection) {
+          targetSection.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          })
+
+          // Update active state only for anchor links
+          navLinks.forEach((l) => {
+            if (l.getAttribute("href") && l.getAttribute("href").startsWith("#")) {
+              l.classList.remove("active")
+            }
+          })
+          link.classList.add("active")
+        }
       }
+      // For non-anchor links (like dashboard.html), let the default behavior happen
     })
   })
 
@@ -186,9 +197,12 @@ function setupNavigation() {
     }
 
     navLinks.forEach((link) => {
-      link.classList.remove("active")
-      if (link.getAttribute("href") === `#${current}`) {
-        link.classList.add("active")
+      const href = link.getAttribute("href")
+      if (href && href.startsWith("#")) {
+        link.classList.remove("active")
+        if (href === `#${current}`) {
+          link.classList.add("active")
+        }
       }
     })
   })

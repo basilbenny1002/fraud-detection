@@ -297,6 +297,9 @@ function parseHistoryData(content) {
     // Determine if it's a website or transaction based on target_type
     const activityType = target_type === "Website" ? "website" : "transaction"
 
+    // Format target with ID prefix for transactions
+    const displayTarget = activityType === "transaction" ? `ID: ${target}` : target
+
     // Determine result and status based on isFraud
     let result, status
     if (isFraud === 1) {
@@ -313,7 +316,7 @@ function parseHistoryData(content) {
     const historyItem = {
       id: key,
       type: activityType,
-      target: target,
+      target: displayTarget,
       date: date,
       result: result,
       status: status,
