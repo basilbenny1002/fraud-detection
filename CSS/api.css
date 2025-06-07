@@ -142,6 +142,18 @@ ul {
   border-right-color: var(--primary-color);
 }
 
+.api-nav a.dashboard-link {
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.75rem;
+}
+
+.api-nav a.dashboard-link:hover {
+  color: var(--primary-color);
+  background-color: var(--primary-light);
+  border-right-color: var(--primary-color);
+}
+
 /* API Key Section */
 .api-key-section {
   padding: 1.5rem;

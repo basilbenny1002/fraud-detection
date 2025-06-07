@@ -80,17 +80,28 @@ function handleWebsiteCheck(event) {
   const urlOnlyMode = document.getElementById("urlOnlyMode").checked
   const userId = localStorage.getItem("user_id")
 
-  let features = {}
+  // Prepare data for API request
+  const requestData = {
+    user_id: userId,
+    url: websiteUrl,
+  }
 
+  // Add feature data only if not in URL-only mode
   if (!urlOnlyMode) {
-    features = {
-      credit_card_payment: document.getElementById("creditCardPayment").checked,
-      money_back_payment: document.getElementById("moneyBackPayment").checked,
-      cash_on_delivery: document.getElementById("cashOnDelivery").checked,
-      crypto_currency: document.getElementById("cryptoCurrency").checked,
-      free_contact_emails: document.getElementById("freeContactEmails").checked,
-      logo_url: document.getElementById("logoUrl").checked,
-    }
+    requestData.credit_card_payment = document.getElementById("creditCardPayment").checked ? 1 : 0
+    requestData.money_back_payment = document.getElementById("moneyBackPayment").checked ? 1 : 0
+    requestData.cash_on_delivery = document.getElementById("cashOnDelivery").checked ? 1 : 0
+    requestData.crypto = document.getElementById("cryptoCurrency").checked ? 1 : 0
+    requestData.free_contact_mails = document.getElementById("freeContactEmails").checked ? 1 : 0
+    requestData.logo_url = document.getElementById("logoUrl").checked ? 1 : 0
+  } else {
+    // Set all features to null for URL-only mode
+    requestData.credit_card_payment = null
+    requestData.money_back_payment = null
+    requestData.cash_on_delivery = null
+    requestData.crypto = null
+    requestData.free_contact_mails = null
+    requestData.logo_url = null
   }
 
   // Show results section with loading state
@@ -119,69 +130,41 @@ function handleWebsiteCheck(event) {
   // Scroll to results
   resultCard.scrollIntoView({ behavior: "smooth" })
 
-  // Prepare data for API request
-  const requestData = {
-    user_id: userId,
-    website_url: websiteUrl,
-    url_only_mode: urlOnlyMode,
-    features: urlOnlyMode ? {} : features,
-  }
-
-  // Simulate API call with dummy data
-  setTimeout(() => {
-    // Generate random confidence for demo
-    const confidence = Math.floor(Math.random() * 100)
-
-    // This would be replaced with a real API call
-    /*
-    const endpoint = urlOnlyMode ? "http://localhost:8000/website-check-url-only" : "http://localhost:8000/website-check"
-    
-    fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestData)
+  // Make API call
+  fetch("http://127.0.0.1:8000/predict/website", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(requestData),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      updateWebsiteCheckResults(data, websiteUrl)
     })
-      .then(response => response.json())
-      .then(data => {
-        updateWebsiteCheckResults(data)
-      })
-      .catch(error => {
-        console.error("Error checking website:", error)
-        updateWebsiteCheckResults(generateDummyResults(websiteUrl, confidence))
-      })
-    */
-
-    // For now, use dummy data
-    updateWebsiteCheckResults(generateDummyResults(websiteUrl, confidence))
-  }, 1500)
+    .catch((error) => {
+      console.error("Error checking website:", error)
+      // Generate dummy data as fallback
+      const confidence = Math.floor(Math.random() * 100)
+      const dummyData = {
+        Prediction: confidence > 50 ? 1 : 0,
+        Confidence: confidence,
+      }
+      updateWebsiteCheckResults(dummyData, websiteUrl)
+    })
 }
 
-function generateDummyResults(websiteUrl, confidence = null) {
-  // Generate a risk score based on the domain name length (just for demo purposes)
-  const score = confidence || Math.min(Math.max(20 + (websiteUrl.length % 50), 0), 100)
+function updateWebsiteCheckResults(data, websiteUrl) {
+  const prediction = data.Prediction
+  const confidence = data.Confidence
 
-  let status, factors
+  // Determine status based on prediction
+  let status, statusText, statusIcon, factors
 
-  if (score < 30) {
-    status = "safe"
-    factors = [
-      { type: "safe", text: "Domain has been registered for over 2 years" },
-      { type: "safe", text: "SSL certificate is valid and up to date" },
-      { type: "safe", text: "No reports of fraudulent activity" },
-      { type: "safe", text: "Contact information is clearly displayed" },
-    ]
-  } else if (score < 70) {
-    status = "suspicious"
-    factors = [
-      { type: "risk", text: "Domain was registered recently (less than 6 months ago)" },
-      { type: "risk", text: "Uses free email service for business contact" },
-      { type: "safe", text: "SSL certificate is valid" },
-      { type: "safe", text: "No reports of fraudulent activity yet" },
-    ]
-  } else {
+  if (prediction === 1) {
     status = "fraudulent"
+    statusText = "Fraudulent - High Risk"
+    statusIcon = "fas fa-times-circle"
     factors = [
       { type: "risk", text: "Domain was registered very recently (less than 1 month ago)" },
       { type: "risk", text: "Uses free email service for business contact" },
@@ -189,42 +172,21 @@ function generateDummyResults(websiteUrl, confidence = null) {
       { type: "risk", text: "SSL certificate is missing or invalid" },
       { type: "risk", text: "Multiple reports of fraudulent activity" },
     ]
+  } else {
+    status = "safe"
+    statusText = "Safe - Low Risk"
+    statusIcon = "fas fa-check-circle"
+    factors = [
+      { type: "safe", text: "Domain has been registered for over 2 years" },
+      { type: "safe", text: "SSL certificate is valid and up to date" },
+      { type: "safe", text: "No reports of fraudulent activity" },
+      { type: "safe", text: "Contact information is clearly displayed" },
+    ]
   }
 
-  return {
-    website_url: websiteUrl,
-    status: status,
-    risk_score: score,
-    confidence: score,
-    factors: factors,
-  }
-}
-
-function updateWebsiteCheckResults(results) {
   // Update status badge
   const statusBadge = document.getElementById("resultStatusBadge")
-  statusBadge.className = `status-badge ${results.status}`
-
-  let statusText, statusIcon
-
-  switch (results.status) {
-    case "safe":
-      statusText = "Safe - Low Risk"
-      statusIcon = "fas fa-check-circle"
-      break
-    case "suspicious":
-      statusText = "Suspicious - Medium Risk"
-      statusIcon = "fas fa-exclamation-circle"
-      break
-    case "fraudulent":
-      statusText = "Fraudulent - High Risk"
-      statusIcon = "fas fa-times-circle"
-      break
-    default:
-      statusText = "Unknown"
-      statusIcon = "fas fa-question-circle"
-  }
-
+  statusBadge.className = `status-badge ${status}`
   document.getElementById("resultStatusText").textContent = statusText
 
   // Replace spinner with appropriate icon
@@ -235,59 +197,58 @@ function updateWebsiteCheckResults(results) {
 
   // Update score bar
   const scoreBar = document.getElementById("resultScoreBar")
-  scoreBar.style.width = `${results.risk_score}%`
-  document.getElementById("resultScoreValue").textContent = `${results.risk_score}%`
+  scoreBar.style.width = `${confidence}%`
+  document.getElementById("resultScoreValue").textContent = `${Number.parseFloat(confidence).toFixed(2)}%`
 
-  if (results.risk_score < 30) {
+  if (confidence < 30) {
     scoreBar.className = "score-fill"
-  } else if (results.risk_score < 70) {
+  } else if (confidence < 70) {
     scoreBar.className = "score-fill medium"
   } else {
     scoreBar.className = "score-fill high"
   }
 
-  // Add confidence display if available
-  if (results.confidence) {
-    const resultContent = document.querySelector(".result-content")
-    let confidenceClass = "low"
-    let interpretation = ""
+  // Add confidence display
+  const resultContent = document.querySelector(".result-content")
+  let confidenceClass = "low"
+  let interpretation = ""
 
-    if (results.confidence < 30) {
-      confidenceClass = "low"
-      interpretation = "Low confidence - Website appears safe"
-    } else if (results.confidence < 70) {
-      confidenceClass = "medium"
-      interpretation = "Medium confidence - Website requires attention"
-    } else {
-      confidenceClass = "high"
-      interpretation = "High confidence - Website likely fraudulent"
-    }
-
-    // Check if confidence display already exists
-    let confidenceDisplay = resultContent.querySelector(".confidence-display")
-    if (!confidenceDisplay) {
-      confidenceDisplay = document.createElement("div")
-      confidenceDisplay.className = "confidence-display"
-      resultContent.insertBefore(confidenceDisplay, resultContent.querySelector(".result-factors"))
-    }
-
-    confidenceDisplay.innerHTML = `
-      <div class="confidence-header">
-        <span class="confidence-label">Fraud Confidence Score</span>
-        <span class="confidence-value ${confidenceClass}">${results.confidence}%</span>
-      </div>
-      <div class="confidence-bar">
-        <div class="confidence-fill ${confidenceClass}" style="width: ${results.confidence}%"></div>
-      </div>
-      <div class="confidence-interpretation">${interpretation}</div>
-    `
+  if (confidence < 30) {
+    confidenceClass = "low"
+    interpretation = "Low confidence - Website appears safe"
+  } else if (confidence < 70) {
+    confidenceClass = "medium"
+    interpretation = "Medium confidence - Website requires attention"
+  } else {
+    confidenceClass = "high"
+    interpretation = "High confidence - Website likely fraudulent"
   }
 
-  // Update factors list
+  // Check if confidence display already exists
+  let confidenceDisplay = resultContent.querySelector(".confidence-display")
+  if (!confidenceDisplay) {
+    confidenceDisplay = document.createElement("div")
+    confidenceDisplay.className = "confidence-display"
+    resultContent.insertBefore(confidenceDisplay, resultContent.querySelector(".result-factors"))
+  }
+
+  const formattedConfidence = Number.parseFloat(confidence).toFixed(2)
+  confidenceDisplay.innerHTML = `
+  <div class="confidence-header">
+    <span class="confidence-label">Fraud Confidence Score</span>
+    <span class="confidence-value ${confidenceClass}">${formattedConfidence}%</span>
+  </div>
+  <div class="confidence-bar">
+    <div class="confidence-fill ${confidenceClass}" style="width: ${confidence}%"></div>
+  </div>
+  <div class="confidence-interpretation">${interpretation}</div>
+`
+
+  // Update factors list - CLEAR FIRST to remove "analyzing" text
   const factorsList = document.getElementById("resultFactorsList")
   factorsList.innerHTML = ""
 
-  results.factors.forEach((factor) => {
+  factors.forEach((factor) => {
     const li = document.createElement("li")
     li.textContent = factor.text
     li.className = factor.type === "risk" ? "risk-factor" : "safe-factor"

@@ -77,8 +77,7 @@ function loadDashboardData() {
 function fetchDashboardStats() {
   const userId = localStorage.getItem("user_id")
 
-  // Uncomment below for real API call
-  fetch(`http://localhost:8000/dashboard/stats`, {
+  fetch(`http://127.0.0.1:8000/dashboard/stats`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -93,13 +92,13 @@ function fetchDashboardStats() {
     })
     .catch((error) => {
       console.error("Error fetching stats:", error)
-      // Use dummy data as fallback
-      const dummyStats = {
+      // Use zero stats for new users
+      const emptyStats = {
         total_checks: 0,
         frauds_detected: 0,
         api_calls: 0,
       }
-      updateStatsCards(dummyStats)
+      updateStatsCards(emptyStats)
     })
 }
 
@@ -116,8 +115,8 @@ function updateStatsCards(stats) {
 function fetchRecentActivity() {
   const userId = localStorage.getItem("user_id")
 
-  // Uncomment below for real API call
-  fetch(`http://localhost:8000/recent-activity`, {
+  // Make API call to get recent activity
+  fetch(`http://127.0.0.1:8000/recent`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -126,52 +125,103 @@ function fetchRecentActivity() {
       user_id: userId,
     }),
   })
-    .then((response) => response.json())
+    .then((response) => {
+      if (response.status === 404) {
+        // Handle 404 - no data found for new user
+        throw new Error("NO_DATA")
+      }
+      return response.json()
+    })
     .then((data) => {
-      updateRecentActivity(data.activities)
+      if (data.Status_code === 200 && data.Content && Object.keys(data.Content).length > 0) {
+        const activities = parseRecentActivityData(data.Content)
+        updateRecentActivity(activities)
+      } else {
+        // Handle empty content
+        throw new Error("NO_DATA")
+      }
     })
     .catch((error) => {
       console.error("Error fetching recent activity:", error)
-      // Use dummy data as fallback
-      const dummyActivity = [
-        {
-          type: "transaction",
-          target: "ID: 58A72C3",
-          date: "Today, 10:23 AM",
-          result: "Legitimate",
-          status: "success",
-        },
-        {
-          type: "website",
-          target: "example-shop.com",
-          date: "Today, 9:45 AM",
-          result: "Fraudulent",
-          status: "danger",
-        },
-        {
-          type: "transaction",
-          target: "ID: 58A71B2",
-          date: "Yesterday, 4:12 PM",
-          result: "Legitimate",
-          status: "success",
-        },
-        {
-          type: "transaction",
-          target: "ID: 58A70A1",
-          date: "Yesterday, 2:30 PM",
-          result: "Suspicious",
-          status: "warning",
-        },
-        {
-          type: "website",
-          target: "secure-payments.net",
-          date: "Yesterday, 11:15 AM",
-          result: "Fraudulent",
-          status: "danger",
-        },
-      ]
-      updateRecentActivity(dummyActivity)
+
+      if (error.message === "NO_DATA") {
+        // Show no data message for new users
+        showNoRecentActivity()
+      } else {
+        // For other errors, show a generic error message
+        showRecentActivityError()
+      }
     })
+}
+
+function parseRecentActivityData(content) {
+  const activities = []
+
+  Object.keys(content).forEach((key) => {
+    const item = content[key]
+    // New array structure: [target, user_id, amount, oldbalanceOrg, newbalanceOrig, oldbalanceDest, newbalanceDest, isFraud, isFlaggedFraud, user_mail, type, method, target_type, confidence, TIMES]
+    const [
+      target,
+      user_id,
+      amount,
+      oldbalanceOrg,
+      newbalanceOrig,
+      oldbalanceDest,
+      newbalanceDest,
+      isFraud,
+      isFlaggedFraud,
+      user_mail,
+      type,
+      method,
+      target_type,
+      confidence,
+      times,
+    ] = item
+
+    // Determine if it's a website or transaction based on target_type
+    const activityType = target_type === "Website" ? "website" : "transaction"
+
+    // Determine result and status based on isFraud
+    let result, status
+    if (isFraud === 1) {
+      result = "Fraudulent"
+      status = "danger"
+    } else {
+      result = "Legitimate"
+      status = "success"
+    }
+
+    // Use raw datetime string from backend
+    const date = times
+
+    const activity = {
+      type: activityType,
+      target: target,
+      date: date,
+      result: result,
+      status: status,
+      transactionData:
+        activityType === "transaction"
+          ? {
+              amount: amount,
+              email: user_mail,
+              method: method || "GUI",
+              oldBalanceOrig: oldbalanceOrg,
+              newBalanceOrig: newbalanceOrig,
+              oldBalanceDest: oldbalanceDest,
+              newBalanceDest: newbalanceDest,
+              type: type,
+              isFraud: isFraud === 1 ? "Yes" : "No",
+              isFlaggedFraud:
+                isFlaggedFraud === "NULL" ? "No" : isFlaggedFraud === 1 || isFlaggedFraud === "1" ? "Yes" : "No",
+            }
+          : null,
+    }
+
+    activities.push(activity)
+  })
+
+  return activities
 }
 
 function updateRecentActivity(activities) {
@@ -181,7 +231,7 @@ function updateRecentActivity(activities) {
 
   tableBody.innerHTML = ""
 
-  activities.forEach((activity) => {
+  activities.forEach((activity, index) => {
     const row = document.createElement("tr")
 
     const typeIcon = activity.type === "website" ? "fas fa-globe" : "fas fa-exchange-alt"
@@ -202,7 +252,7 @@ function updateRecentActivity(activities) {
       <td>
         ${
           activity.type === "transaction"
-            ? `<button class="btn btn-sm btn-outline" onclick="showTransactionDetails('${activity.target}')">View Details</button>`
+            ? `<button class="btn btn-sm btn-outline" onclick="showTransactionDetails(${index})">View Details</button>`
             : `<span class="text-light">-</span>`
         }
       </td>
@@ -210,56 +260,81 @@ function updateRecentActivity(activities) {
 
     tableBody.appendChild(row)
   })
+
+  // Store activities globally for modal access
+  window.recentActivities = activities
 }
 
-// Update showTransactionDetails function to include method
-function showTransactionDetails(target) {
-  // Simulate API call with dummy data
-  const dummyDetails = {
-    amount: "$2,450.00",
-    email: "user" + Math.floor(Math.random() * 1000) + "@example.com",
-    method: Math.random() > 0.5 ? "GUI" : "API",
-    oldBalanceOrig: "$15,230.50",
-    newBalanceOrig: "$12,780.50",
-    oldBalanceDest: "$8,920.25",
-    newBalanceDest: "$11,370.25",
-    type: "TRANSFER",
-    isFraud: "No",
-    isFlaggedFraud: "No",
+function showNoRecentActivity() {
+  const tableBody = document.getElementById("recentActivityTable")
+
+  if (!tableBody) return
+
+  tableBody.innerHTML = `
+    <tr>
+      <td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-light);">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+          <i class="fas fa-search" style="font-size: 2rem; opacity: 0.5;"></i>
+          <div>
+            <h3 style="margin-bottom: 0.5rem; color: var(--text-color);">No Recent Activity</h3>
+            <p style="margin: 0;">Start by checking websites or transactions to see your activity here.</p>
+          </div>
+          <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+            <a href="website-check.html" class="btn btn-primary btn-sm">
+              <i class="fas fa-globe"></i>
+              Check Website
+            </a>
+            <a href="transaction-check.html" class="btn btn-outline btn-sm">
+              <i class="fas fa-exchange-alt"></i>
+              Check Transaction
+            </a>
+          </div>
+        </div>
+      </td>
+    </tr>
+  `
+}
+
+function showRecentActivityError() {
+  const tableBody = document.getElementById("recentActivityTable")
+
+  if (!tableBody) return
+
+  tableBody.innerHTML = `
+    <tr>
+      <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-light);">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+          <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: var(--warning-color);"></i>
+          <div>
+            <h3 style="margin-bottom: 0.5rem; color: var(--text-color);">Unable to Load Activity</h3>
+            <p style="margin: 0;">There was an error loading your recent activity. Please try refreshing the page.</p>
+          </div>
+          <button onclick="fetchRecentActivity()" class="btn btn-outline btn-sm">
+            <i class="fas fa-refresh"></i>
+            Retry
+          </button>
+        </div>
+      </td>
+    </tr>
+  `
+}
+
+// Update showTransactionDetails function to use stored data
+function showTransactionDetails(index) {
+  const activity = window.recentActivities[index]
+  if (activity && activity.transactionData) {
+    updateTransactionModal(activity.transactionData)
   }
-
-  updateTransactionModal(dummyDetails)
-
-  // Uncomment below for real API call
-  /*
-  fetch(`http://localhost:8000/transaction-details`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      target: target
-    })
-  })
-    .then(response => response.json())
-    .then(data => {
-      updateTransactionModal(data)
-    })
-    .catch(error => {
-      console.error("Error fetching transaction details:", error)
-      updateTransactionModal(dummyDetails)
-    })
-  */
 }
 
 function updateTransactionModal(details) {
-  document.getElementById("modalAmount").textContent = details.amount
+  document.getElementById("modalAmount").textContent = `$${details.amount}`
   document.getElementById("modalEmail").textContent = details.email
   document.getElementById("modalMethod").textContent = details.method || "GUI"
-  document.getElementById("modalOldBalanceOrig").textContent = details.oldBalanceOrig
-  document.getElementById("modalNewBalanceOrig").textContent = details.newBalanceOrig
-  document.getElementById("modalOldBalanceDest").textContent = details.oldBalanceDest
-  document.getElementById("modalNewBalanceDest").textContent = details.newBalanceDest
+  document.getElementById("modalOldBalanceOrig").textContent = `$${details.oldBalanceOrig}`
+  document.getElementById("modalNewBalanceOrig").textContent = `$${details.newBalanceOrig}`
+  document.getElementById("modalOldBalanceDest").textContent = `$${details.oldBalanceDest}`
+  document.getElementById("modalNewBalanceDest").textContent = `$${details.newBalanceDest}`
   document.getElementById("modalType").textContent = details.type
   document.getElementById("modalIsFraud").textContent = details.isFraud
   document.getElementById("modalIsFlaggedFraud").textContent = details.isFlaggedFraud

@@ -80,17 +80,26 @@ function generate_new_key() {
   regenerateButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...'
   regenerateButton.disabled = true
 
-  const api_url = "http://127.0.0.1:8000/regenerate_key/"
+  const api_url = "http://127.0.0.1:8000/regenerate_key"
   fetch(api_url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ user_id: localStorage.getItem("user_id") }),
   })
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      return response.json()
+    })
     .then((data) => {
-      if (data.Status_code == 200) {
-        console.log(data)
+      if (data.Status_code === 200 && data.API_KEY) {
+        console.log("API key regenerated successfully:", data)
+
+        // Update localStorage with new API key
         localStorage.setItem("api_key", data.API_KEY)
+
+        // Update the display
         const apiKeyTextElement = document.getElementById("apiKeyText")
         if (apiKeyTextElement) {
           apiKeyTextElement.textContent = data.API_KEY
@@ -106,16 +115,28 @@ function generate_new_key() {
           regenerateButton.disabled = false
         }, 2000)
       } else {
-        alert(`An error occurred: ${data.Message}`)
-        regenerateButton.innerHTML = originalContent
-        regenerateButton.disabled = false
+        throw new Error(data.Message || "Failed to regenerate API key")
       }
     })
     .catch((error) => {
       console.error("Error regenerating API key:", error)
-      alert("Failed to regenerate API key. Please try again.")
-      regenerateButton.innerHTML = originalContent
-      regenerateButton.disabled = false
+
+      // Show error state
+      regenerateButton.innerHTML = '<i class="fas fa-times"></i> Error'
+      regenerateButton.style.color = "var(--danger-color)"
+
+      // Show user-friendly error message
+      const errorMessage = error.message.includes("HTTP error")
+        ? "Server error. Please try again later."
+        : error.message || "Failed to regenerate API key. Please try again."
+
+      alert(`Error: ${errorMessage}`)
+
+      setTimeout(() => {
+        regenerateButton.innerHTML = originalContent
+        regenerateButton.style.color = ""
+        regenerateButton.disabled = false
+      }, 2000)
     })
 }
 
@@ -148,10 +169,21 @@ function setupNavigation() {
     let current = ""
     sections.forEach((section) => {
       const sectionTop = section.offsetTop - 100
-      if (window.pageYOffset >= sectionTop) {
+      const sectionBottom = sectionTop + section.offsetHeight
+      const scrollPosition = window.pageYOffset + 200
+
+      if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
         current = section.getAttribute("id")
       }
     })
+
+    // If we're at the bottom of the page, highlight the last section
+    if (window.innerHeight + window.pageYOffset >= document.body.offsetHeight - 100) {
+      const lastSection = sections[sections.length - 1]
+      if (lastSection) {
+        current = lastSection.getAttribute("id")
+      }
+    }
 
     navLinks.forEach((link) => {
       link.classList.remove("active")

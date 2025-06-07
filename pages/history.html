@@ -12,7 +12,7 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <a href="dashboard.html" class="logo">
+                <a href="home.html" class="logo">
                     <i class="fas fa-shield-alt"></i>
                     <span>FraudShield</span>
                 </a>
@@ -105,13 +105,23 @@
             <!-- History Content -->
             <div class="history-content">
                 <div class="page-header">
-                    <h1>Search History</h1>
+                    <h1>Transaction History</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-outline" onclick="exportHistory()" title="Export history to CSV">
+                            <i class="fas fa-download"></i>
+                            Export CSV
+                        </button>
+                        <button class="btn btn-outline" onclick="clearHistory()" title="Clear all history">
+                            <i class="fas fa-trash"></i>
+                            Clear History
+                        </button>
+                    </div>
                 </div>
                 
                 <!-- History Table -->
                 <div class="history-table-container">
                     <div class="table-header">
-                        <h3>Recent Activity</h3>
+                        <h3>All Transactions</h3>
                         <div class="table-info">
                             <span id="totalResults">Loading...</span> results
                         </div>
@@ -142,15 +152,12 @@
                         </table>
                     </div>
                     
-                    <div class="loading-more" id="loadingMore" style="display: none;">
-                        <div class="loading-spinner">
-                            <i class="fas fa-spinner fa-spin"></i>
-                            Loading more results...
+                    <div class="no-results" id="noResults" style="display: none;">
+                        <div class="no-results-content">
+                            <i class="fas fa-search"></i>
+                            <h3>No transactions found</h3>
+                            <p>Try adjusting your search or filter criteria</p>
                         </div>
-                    </div>
-                    
-                    <div class="no-more-results" id="noMoreResults" style="display: none;">
-                        <p>No more results to load</p>
                     </div>
                 </div>
             </div>

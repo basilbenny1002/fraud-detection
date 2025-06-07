@@ -60,12 +60,12 @@ function predict(event) {
 
   // Get form data
   const user_id = localStorage.getItem("user_id")
-  const amount = document.getElementById("amount").value
+  const amount = Number.parseFloat(document.getElementById("amount").value)
   const mail = document.getElementById("clientMail").value
-  const oldbalanceOrg = document.getElementById("oldbalanceOrg").value
-  const newbalanceOrig = document.getElementById("newbalanceOrig").value
-  const oldbalanceDest = document.getElementById("oldbalanceDest").value
-  const newbalanceDest = document.getElementById("newbalanceDest").value
+  const oldbalanceOrg = Number.parseFloat(document.getElementById("oldbalanceOrg").value)
+  const newbalanceOrig = Number.parseFloat(document.getElementById("newbalanceOrig").value)
+  const oldbalanceDest = Number.parseFloat(document.getElementById("oldbalanceDest").value)
+  const newbalanceDest = Number.parseFloat(document.getElementById("newbalanceDest").value)
   const isFlaggedFraud = document.getElementById("isFlaggedFraud").checked ? 1.0 : 0.0
   const type = document.getElementById("transactionType").value
 
@@ -108,38 +108,25 @@ function predict(event) {
     mail,
   }
 
-  // Simulate API call with dummy data for now
-  setTimeout(() => {
-    // Generate random confidence score for demo
-    const confidence = Math.floor(Math.random() * 100)
-    const prediction = confidence > 50 ? 1 : 0
-
-    displayPredictionResult(prediction, mail, confidence)
-
-    // Uncomment below for real API call
-    /*
-    fetch("http://127.0.0.1:8000/predict/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestData),
+  // Make API call
+  fetch("http://127.0.0.1:8000/predict/transaction", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(requestData),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      displayPredictionResult(data.Prediction, mail, data.Confidence)
     })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.Status_code === 200) {
-          const confidence = data.confidence || Math.floor(Math.random() * 100)
-          displayPredictionResult(data.Prediction, mail, confidence)
-        } else {
-          displayPredictionResult(null, mail, null, data.Message)
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error)
-        displayPredictionResult(null, mail, null, "Failed to analyze transaction")
-      })
-    */
-  }, 2000)
+    .catch((error) => {
+      console.error("Error:", error)
+      // Generate dummy data as fallback
+      const confidence = Math.floor(Math.random() * 100)
+      const prediction = confidence > 50 ? 1 : 0
+      displayPredictionResult(prediction, mail, confidence)
+    })
 }
 
 function displayPredictionResult(prediction, mail, confidence, errorMessage = "") {
@@ -164,15 +151,22 @@ function displayPredictionResult(prediction, mail, confidence, errorMessage = ""
   let interpretation = ""
 
   if (confidence !== null) {
-    if (confidence < 30) {
-      confidenceClass = "low"
-      interpretation = "Low risk - Transaction appears legitimate"
-    } else if (confidence < 70) {
-      confidenceClass = "medium"
-      interpretation = "Medium risk - Transaction requires attention"
+    if (prediction === 1) {
+      // Only show red colors for fraudulent transactions
+      if (confidence < 30) {
+        confidenceClass = "low"
+        interpretation = "Low confidence fraud detection"
+      } else if (confidence < 70) {
+        confidenceClass = "medium"
+        interpretation = "Medium confidence fraud detection"
+      } else {
+        confidenceClass = "high"
+        interpretation = "High confidence fraud detection"
+      }
     } else {
-      confidenceClass = "high"
-      interpretation = "High risk - Transaction likely fraudulent"
+      // For legitimate transactions, always use green/low
+      confidenceClass = "low"
+      interpretation = "Transaction appears legitimate"
     }
   }
 
@@ -190,23 +184,25 @@ function displayPredictionResult(prediction, mail, confidence, errorMessage = ""
 
   predictionResultDiv.classList.add(resultClass)
 
+  // Only show email notification for fraudulent transactions
   let emailNotification = ""
-  if (mail) {
+  if (mail && prediction === 1) {
     emailNotification = `
       <div class="email-notification">
         <i class="fas fa-envelope"></i>
-        <span>Notification sent to ${mail}</span>
+        <span>Fraud alert sent to ${mail}</span>
       </div>
     `
   }
 
   let confidenceDisplay = ""
   if (confidence !== null) {
+    const formattedConfidence = Number.parseFloat(confidence).toFixed(2)
     confidenceDisplay = `
       <div class="confidence-display">
         <div class="confidence-header">
           <span class="confidence-label">Fraud Confidence Score</span>
-          <span class="confidence-value ${confidenceClass}">${confidence}%</span>
+          <span class="confidence-value ${confidenceClass}">${formattedConfidence}%</span>
         </div>
         <div class="confidence-bar">
           <div class="confidence-fill ${confidenceClass}" style="width: ${confidence}%"></div>

@@ -13,7 +13,7 @@
         <!-- Sidebar -->
         <aside class="api-sidebar">
             <div class="sidebar-header">
-                <a href="dashboard.html" class="logo">
+                <a href="home.html" class="logo">
                     <i class="fas fa-shield-alt"></i>
                     <span>FraudShield</span>
                 </a>
@@ -21,10 +21,15 @@
             
             <nav class="api-nav">
                 <ul>
+                    <li><a href="dashboard.html" class="dashboard-link">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Dashboard
+                    </a></li>
                     <li><a href="#overview" class="active">Overview</a></li>
                     <li><a href="#authentication">Authentication</a></li>
-                    <li><a href="#website-check">Website Check</a></li>
-                    <li><a href="#transaction-check">Transaction Check</a></li>
+                    <li><a href="#prediction-endpoint">Prediction Endpoint</a></li>
+                    <li><a href="#website-prediction">Website Prediction</a></li>
+                    <li><a href="#transaction-prediction">Transaction Prediction</a></li>
                     <li><a href="#response-format">Response Format</a></li>
                     <li><a href="#error-codes">Error Codes</a></li>
                     <li><a href="#rate-limits">Rate Limits</a></li>
@@ -66,7 +71,7 @@
             <!-- Overview Section -->
             <section id="overview" class="api-section">
                 <h2>Overview</h2>
-                <p>The FraudShield API provides endpoints for detecting fraud in websites and financial transactions. All API requests require authentication via API key and return JSON responses.</p>
+                <p>The FraudShield API provides a unified endpoint for detecting fraud in websites and financial transactions. All API requests require authentication via API key and return JSON responses.</p>
                 
                 <div class="info-box">
                     <h3>Base URL</h3>
@@ -114,14 +119,14 @@ Content-Type: application/json</code></pre>
                 </div>
             </section>
             
-            <!-- Website Check Section -->
-            <section id="website-check" class="api-section">
-                <h2>Website Fraud Check</h2>
-                <p>Analyze a website for potential fraud indicators based on various parameters.</p>
+            <!-- Prediction Endpoint Section -->
+            <section id="prediction-endpoint" class="api-section">
+                <h2>Unified Prediction Endpoint</h2>
+                <p>The FraudShield API uses a single endpoint for all fraud detection requests. The type of analysis is determined by the <code>type</code> parameter.</p>
                 
                 <div class="endpoint-box">
                     <span class="method post">POST</span>
-                    <code>/website-check</code>
+                    <code>/api/predict</code>
                 </div>
                 
                 <h3>Request Parameters</h3>
@@ -137,46 +142,80 @@ Content-Type: application/json</code></pre>
                         </thead>
                         <tbody>
                             <tr>
-                                <td><code>website_url</code></td>
+                                <td><code>type</code></td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>Type of prediction: "Website" or "Transaction"</td>
+                            </tr>
+                            <tr>
+                                <td><code>values</code></td>
+                                <td>object</td>
+                                <td>Yes</td>
+                                <td>Parameters specific to the prediction type</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- Website Prediction Section -->
+            <section id="website-prediction" class="api-section">
+                <h2>Website Fraud Prediction</h2>
+                <p>Analyze a website for potential fraud indicators based on various parameters.</p>
+                
+                <h3>Website Values Parameters</h3>
+                <div class="params-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>url</code></td>
                                 <td>string</td>
                                 <td>Yes</td>
                                 <td>The URL of the website to analyze</td>
                             </tr>
                             <tr>
                                 <td><code>credit_card_payment</code></td>
-                                <td>boolean</td>
-                                <td>Yes</td>
-                                <td>Presence of credit card payment option</td>
+                                <td>integer/null</td>
+                                <td>No</td>
+                                <td>Presence of credit card payment option (0/1 or null)</td>
                             </tr>
                             <tr>
                                 <td><code>money_back_payment</code></td>
-                                <td>boolean</td>
-                                <td>Yes</td>
-                                <td>Presence of money back guarantee</td>
+                                <td>integer/null</td>
+                                <td>No</td>
+                                <td>Presence of money back guarantee (0/1 or null)</td>
                             </tr>
                             <tr>
                                 <td><code>cash_on_delivery</code></td>
-                                <td>boolean</td>
-                                <td>Yes</td>
-                                <td>Cash on delivery payment option</td>
+                                <td>integer/null</td>
+                                <td>No</td>
+                                <td>Cash on delivery payment option (0/1 or null)</td>
                             </tr>
                             <tr>
-                                <td><code>crypto_currency</code></td>
-                                <td>boolean</td>
-                                <td>Yes</td>
-                                <td>Cryptocurrency payment option</td>
+                                <td><code>crypto</code></td>
+                                <td>integer/null</td>
+                                <td>No</td>
+                                <td>Cryptocurrency payment option (0/1 or null)</td>
                             </tr>
                             <tr>
-                                <td><code>free_contact_emails</code></td>
-                                <td>boolean</td>
-                                <td>Yes</td>
-                                <td>Use of free email services for contact</td>
+                                <td><code>free_contact_mails</code></td>
+                                <td>integer/null</td>
+                                <td>No</td>
+                                <td>Use of free email services for contact (0/1 or null)</td>
                             </tr>
                             <tr>
                                 <td><code>logo_url</code></td>
-                                <td>boolean</td>
-                                <td>Yes</td>
-                                <td>Presence of company logo</td>
+                                <td>integer/null</td>
+                                <td>No</td>
+                                <td>Presence of company logo (0/1 or null)</td>
                             </tr>
                         </tbody>
                     </table>
@@ -190,50 +229,30 @@ Content-Type: application/json</code></pre>
                             <i class="fas fa-copy"></i>
                         </button>
                     </div>
-                    <pre><code class="language-bash">curl -X POST http://localhost:8000/website-check \
+                    <pre><code class="language-bash">curl -X POST http://localhost:8000/api/predict \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "website_url": "https://example-shop.com",
-    "credit_card_payment": true,
-    "money_back_payment": false,
-    "cash_on_delivery": true,
-    "crypto_currency": false,
-    "free_contact_emails": true,
-    "logo_url": false
+    "type": "Website",
+    "values": {
+      "url": "https://example-shop.com",
+      "credit_card_payment": 1,
+      "money_back_payment": 0,
+      "cash_on_delivery": 1,
+      "crypto": 0,
+      "free_contact_mails": 1,
+      "logo_url": 0
+    }
   }'</code></pre>
-                </div>
-                
-                <h3>Example Response</h3>
-                <div class="code-block">
-                    <div class="code-header">
-                        <span>JSON</span>
-                        <button class="copy-code-btn" onclick="copyCode(this)">
-                            <i class="fas fa-copy"></i>
-                        </button>
-                    </div>
-                    <pre><code class="language-json">{
-  "status_code": 200,
-  "prediction": 1,
-  "confidence": 0.87,
-  "result": "fraudulent",
-  "message": "Website shows high fraud indicators",
-  "timestamp": "2025-01-06T12:55:08Z"
-}</code></pre>
                 </div>
             </section>
             
-            <!-- Transaction Check Section -->
-            <section id="transaction-check" class="api-section">
-                <h2>Transaction Fraud Check</h2>
+            <!-- Transaction Prediction Section -->
+            <section id="transaction-prediction" class="api-section">
+                <h2>Transaction Fraud Prediction</h2>
                 <p>Analyze financial transactions for fraud detection using machine learning models.</p>
                 
-                <div class="endpoint-box">
-                    <span class="method post">POST</span>
-                    <code>/transaction-check</code>
-                </div>
-                
-                <h3>Request Parameters</h3>
+                <h3>Transaction Values Parameters</h3>
                 <div class="params-table">
                     <table>
                         <thead>
@@ -287,6 +306,12 @@ Content-Type: application/json</code></pre>
                                 <td>Yes</td>
                                 <td>Transaction type: CASH_IN, CASH_OUT, DEBIT, PAYMENT, TRANSFER</td>
                             </tr>
+                            <tr>
+                                <td><code>mail</code></td>
+                                <td>string</td>
+                                <td>No</td>
+                                <td>Email address for notifications</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -299,36 +324,22 @@ Content-Type: application/json</code></pre>
                             <i class="fas fa-copy"></i>
                         </button>
                     </div>
-                    <pre><code class="language-bash">curl -X POST http://localhost:8000/transaction-check \
+                    <pre><code class="language-bash">curl -X POST http://localhost:8000/api/predict \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "amount": 5000.00,
-    "oldbalanceOrg": 15000.00,
-    "newbalanceOrig": 10000.00,
-    "oldbalanceDest": 2000.00,
-    "newbalanceDest": 7000.00,
-    "isFlaggedFraud": 0,
-    "type": "TRANSFER"
+    "type": "Transaction",
+    "values": {
+      "amount": 5000.00,
+      "oldbalanceOrg": 15000.00,
+      "newbalanceOrig": 10000.00,
+      "oldbalanceDest": 2000.00,
+      "newbalanceDest": 7000.00,
+      "isFlaggedFraud": 0,
+      "type": "TRANSFER",
+      "mail": "user@example.com"
+    }
   }'</code></pre>
-                </div>
-                
-                <h3>Example Response</h3>
-                <div class="code-block">
-                    <div class="code-header">
-                        <span>JSON</span>
-                        <button class="copy-code-btn" onclick="copyCode(this)">
-                            <i class="fas fa-copy"></i>
-                        </button>
-                    </div>
-                    <pre><code class="language-json">{
-  "status_code": 200,
-  "prediction": 0,
-  "confidence": 0.92,
-  "result": "legitimate",
-  "message": "Transaction appears legitimate",
-  "timestamp": "2025-01-06T12:55:08Z"
-}</code></pre>
                 </div>
             </section>
             
@@ -348,11 +359,6 @@ Content-Type: application/json</code></pre>
                         </thead>
                         <tbody>
                             <tr>
-                                <td><code>status_code</code></td>
-                                <td>number</td>
-                                <td>HTTP status code (200 for success)</td>
-                            </tr>
-                            <tr>
                                 <td><code>prediction</code></td>
                                 <td>number</td>
                                 <td>0 = legitimate, 1 = fraudulent</td>
@@ -360,25 +366,24 @@ Content-Type: application/json</code></pre>
                             <tr>
                                 <td><code>confidence</code></td>
                                 <td>number</td>
-                                <td>Confidence score (0.0 to 1.0)</td>
-                            </tr>
-                            <tr>
-                                <td><code>result</code></td>
-                                <td>string</td>
-                                <td>Human-readable result: "legitimate" or "fraudulent"</td>
-                            </tr>
-                            <tr>
-                                <td><code>message</code></td>
-                                <td>string</td>
-                                <td>Descriptive message about the result</td>
-                            </tr>
-                            <tr>
-                                <td><code>timestamp</code></td>
-                                <td>string</td>
-                                <td>ISO 8601 timestamp of the analysis</td>
+                                <td>Confidence score (0 to 100)</td>
                             </tr>
                         </tbody>
                     </table>
+                </div>
+                
+                <h3>Success Response</h3>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>JSON</span>
+                        <button class="copy-code-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <pre><code class="language-json">{
+  "prediction": 0,
+  "confidence": 85
+}</code></pre>
                 </div>
             </section>
             
@@ -435,10 +440,8 @@ Content-Type: application/json</code></pre>
                         </button>
                     </div>
                     <pre><code class="language-json">{
-  "status_code": 400,
-  "error": "Bad Request",
-  "message": "Missing required parameter: amount",
-  "timestamp": "2025-01-06T12:55:08Z"
+  "error": "Invalid API key",
+  "message": "The provided API key is invalid or expired"
 }</code></pre>
                 </div>
             </section>
