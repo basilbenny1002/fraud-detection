@@ -8,6 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize transaction check page
   displayUserInfo()
   setupEventListeners()
+  setDateInputMaxToToday() // New function call to set max date
+  setupDateValidation() // New function call for date validation
 })
 
 function displayUserInfo() {
@@ -55,30 +57,84 @@ function toggleSidebar() {
   }
 }
 
+function setDateInputMaxToToday() {
+  const today = new Date().toISOString().split("T")[0] // Get today's date in YYYY-MM-DD format
+  const signupDateInput = document.getElementById("signup_date")
+  const purchaseDateInput = document.getElementById("purchase_date")
+
+  if (signupDateInput) {
+    signupDateInput.setAttribute("max", today)
+  }
+  if (purchaseDateInput) {
+    purchaseDateInput.setAttribute("max", today)
+  }
+}
+
+function setupDateValidation() {
+  const signupDateInput = document.getElementById("signup_date")
+  const purchaseDateInput = document.getElementById("purchase_date")
+
+  if (signupDateInput && purchaseDateInput) {
+    // When signup date changes, update the min attribute of purchase date
+    signupDateInput.addEventListener("change", () => {
+      purchaseDateInput.setAttribute("min", signupDateInput.value)
+      // If purchase date is already set and is now before signup date, clear it
+      if (purchaseDateInput.value && purchaseDateInput.value < signupDateInput.value) {
+        purchaseDateInput.value = signupDateInput.value // Or clear it: purchaseDateInput.value = '';
+      }
+    })
+
+    // Initial setting in case signup date has a default value
+    if (signupDateInput.value) {
+      purchaseDateInput.setAttribute("min", signupDateInput.value)
+    }
+  }
+}
+
+function getDayName(dateString) {
+  const date = new Date(dateString)
+  return date.toLocaleDateString("en-US", { weekday: "long" })
+}
+
 function predict(event) {
   event.preventDefault()
 
   // Get form data
-  const user_id = localStorage.getItem("user_id")
-  const amount = Number.parseFloat(document.getElementById("amount").value)
-  const mail = document.getElementById("clientMail").value
-  const oldbalanceOrg = Number.parseFloat(document.getElementById("oldbalanceOrg").value)
-  const newbalanceOrig = Number.parseFloat(document.getElementById("newbalanceOrig").value)
-  const oldbalanceDest = Number.parseFloat(document.getElementById("oldbalanceDest").value)
-  const newbalanceDest = Number.parseFloat(document.getElementById("newbalanceDest").value)
-  const isFlaggedFraud = document.getElementById("isFlaggedFraud").checked ? 1.0 : 0.0
-  const type = document.getElementById("transactionType").value
+  const source = document.getElementById("source").value
+  const browser = document.getElementById("browser").value
+  const sex = document.getElementById("sex").value === "Female" ? "F" : "M" // Map Male/Female to M/F
+  const age = Number.parseInt(document.getElementById("age").value)
+  const country_name = document.getElementById("country_name").value
+  const n_device_occur = Number.parseInt(document.getElementById("n_device_occur").value)
+
+  const signupDate = new Date(document.getElementById("signup_date").value)
+  const signup_month = signupDate.getMonth() + 1 // Month is 0-indexed
+  const signup_day = signupDate.getDate()
+  const signup_day_name = getDayName(document.getElementById("signup_date").value)
+
+  const purchaseDate = new Date(document.getElementById("purchase_date").value)
+  const purchase_month = purchaseDate.getMonth() + 1 // Month is 0-indexed
+  const purchase_day = purchaseDate.getDate()
+  const purchase_day_name = getDayName(document.getElementById("purchase_date").value)
+
+  const purchase_over_time = Number.parseFloat(document.getElementById("purchase_over_time").value)
+  const mail = document.getElementById("clientMail").value // Get mail value
 
   console.log("Form data collected:", {
-    user_id,
-    type,
-    amount,
-    oldbalanceOrg,
-    newbalanceOrig,
-    oldbalanceDest,
-    newbalanceDest,
-    isFlaggedFraud,
-    mail,
+    source,
+    browser,
+    sex,
+    age,
+    country_name,
+    n_device_occur,
+    signup_month,
+    signup_day,
+    signup_day_name,
+    purchase_month,
+    purchase_day,
+    purchase_day_name,
+    purchase_over_time,
+    mail, // Include mail in log
   })
 
   // Show loading state
@@ -97,15 +153,20 @@ function predict(event) {
 
   // Prepare data for API request
   const requestData = {
-    user_id,
-    amount,
-    oldbalanceOrg,
-    newbalanceOrig,
-    oldbalanceDest,
-    newbalanceDest,
-    isFlaggedFraud,
-    type,
-    mail,
+    source,
+    browser,
+    sex,
+    age,
+    country_name,
+    n_device_occur,
+    signup_month,
+    signup_day,
+    signup_day_name,
+    purchase_month,
+    purchase_day,
+    purchase_day_name,
+    purchase_over_time,
+    mail, // Include mail in request data
   }
 
   console.log("Request data being sent:", requestData)
@@ -121,6 +182,7 @@ function predict(event) {
     .then((response) => response.json())
     .then((data) => {
       console.log("Raw backend response:", data)
+      // Pass mail to displayPredictionResult
       displayPredictionResult(data.Prediction, mail, data.Confidence)
     })
     .catch((error) => {
