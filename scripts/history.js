@@ -124,10 +124,10 @@ function handleFilter(event) {
 
     if (filterButton) {
       filterButton.innerHTML = `
-        <i class="fas fa-filter"></i>
-        ${filterText}
-        <i class="fas fa-chevron-down"></i>
-      `
+      <i class="fas fa-filter"></i>
+      ${filterText}
+      <i class="fas fa-chevron-down"></i>
+    `
     }
 
     filterAndDisplayData()
@@ -219,15 +219,15 @@ function loadHistoryData() {
   const tableBody = document.getElementById("historyTableBody")
   if (tableBody) {
     tableBody.innerHTML = `
-      <tr>
-        <td colspan="6" class="loading-row">
-          <div class="loading-spinner">
-            <i class="fas fa-spinner fa-spin"></i>
-            Loading history...
-          </div>
-        </td>
-      </tr>
-    `
+    <tr>
+      <td colspan="6" class="loading-row">
+        <div class="loading-spinner">
+          <i class="fas fa-spinner fa-spin"></i>
+          Loading history...
+        </div>
+      </td>
+    </tr>
+  `
   }
 
   // Make API call to get transaction details
@@ -275,34 +275,19 @@ function parseHistoryData(content) {
 
   Object.keys(content).forEach((key) => {
     const item = content[key]
-    // New array structure: [target, user_id, amount, oldbalanceOrg, newbalanceOrig, oldbalanceDest, newbalanceDest, isFraud, isFlaggedFraud, user_mail, type, method, target_type, confidence, TIMES]
-    const [
-      target,
-      user_id,
-      amount,
-      oldbalanceOrg,
-      newbalanceOrig,
-      oldbalanceDest,
-      newbalanceDest,
-      isFraud,
-      isFlaggedFraud,
-      user_mail,
-      type,
-      method,
-      target_type,
-      confidence,
-      times,
-    ] = item
+    // New array structure:
+    // [0: target_or_id, 1: user_id, 2: prediction, 3: user_mail, 4: method,
+    //  5: type_string, 6: confidence, 7: json_string_or_null, 8: timestamp]
+    const [targetOrId, userId, prediction, userMail, method, typeString, confidence, jsonStringOrNull, timestamp] = item
 
-    // Determine if it's a website or transaction based on target_type
-    const activityType = target_type === "Website" ? "website" : "transaction"
+    const activityType = typeString === "Website" ? "website" : "transaction"
 
     // Format target with ID prefix for transactions
-    const displayTarget = activityType === "transaction" ? `ID: ${target}` : target
+    const displayTarget = activityType === "transaction" ? `ID: ${targetOrId}` : targetOrId
 
-    // Determine result and status based on isFraud
+    // Determine result and status based on prediction (index 2)
     let result, status
-    if (isFraud === 1) {
+    if (prediction === 1) {
       result = "Fraudulent"
       status = "danger"
     } else {
@@ -310,33 +295,33 @@ function parseHistoryData(content) {
       status = "success"
     }
 
-    // Format date
-    const date = times
+    let transactionDetailsParsed = null
+    if (activityType === "transaction" && jsonStringOrNull) {
+      try {
+        transactionDetailsParsed = JSON.parse(jsonStringOrNull)
+      } catch (e) {
+        console.error("Error parsing transaction JSON string:", e, jsonStringOrNull)
+      }
+    }
 
     const historyItem = {
       id: key,
       type: activityType,
       target: displayTarget,
-      date: date,
+      date: timestamp, // Use timestamp directly
       result: result,
       status: status,
       confidence: confidence || 0,
-      transactionData:
-        activityType === "transaction"
-          ? {
-              amount: amount,
-              email: user_mail,
-              method: method || "GUI",
-              oldBalanceOrig: oldbalanceOrg,
-              newBalanceOrig: newbalanceOrig,
-              oldBalanceDest: oldbalanceDest,
-              newBalanceDest: newbalanceDest,
-              type: type,
-              isFraud: isFraud === 1 ? "Yes" : "No",
-              isFlaggedFraud:
-                isFlaggedFraud === "NULL" ? "No" : isFlaggedFraud === 1 || isFlaggedFraud === "1" ? "Yes" : "No",
-            }
-          : null,
+      fullDetails: {
+        originalTarget: targetOrId, // Store original for website URL
+        prediction: prediction,
+        userMail: userMail,
+        method: method,
+        typeString: typeString,
+        confidence: confidence,
+        transactionSpecificData: transactionDetailsParsed, // Parsed JSON for transactions
+        timestamp: timestamp,
+      },
     }
 
     historyData.push(historyItem)
@@ -359,10 +344,10 @@ function displayHistoryData(data, clearTable = false) {
 
   if (data.length === 0) {
     tableBody.innerHTML = `
-      <tr>
-        <td colspan="6" class="loading-row">No entries found</td>
-      </tr>
-    `
+    <tr>
+      <td colspan="6" class="loading-row">No entries found</td>
+    </tr>
+  `
     return
   }
 
@@ -382,33 +367,38 @@ function displayHistoryData(data, clearTable = false) {
     const dateDisplay = item.date
 
     row.innerHTML = `
-      <td>
-        <div class="activity-type ${typeClass}">
-          <i class="${typeIcon}"></i>
-          ${item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+    <td>
+      <div class="activity-type ${typeClass}">
+        <i class="${typeIcon}"></i>
+        ${item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+      </div>
+    </td>
+    <td>${item.target}</td>
+    <td>${dateDisplay}</td>
+    <td>
+      <span class="status-badge ${item.status}">${item.result}</span>
+    </td>
+    <td>
+      <div class="confidence-bar">
+        <div class="confidence-progress">
+          <div class="confidence-fill ${confidenceClass}" style="width: ${item.confidence}%"></div>
         </div>
-      </td>
-      <td>${item.target}</td>
-      <td>${dateDisplay}</td>
-      <td>
-        <span class="status-badge ${item.status}">${item.result}</span>
-      </td>
-      <td>
-        <div class="confidence-bar">
-          <div class="confidence-progress">
-            <div class="confidence-fill ${confidenceClass}" style="width: ${item.confidence}%"></div>
-          </div>
-          <span class="confidence-text">${Number.parseFloat(item.confidence).toFixed(2)}%</span>
-        </div>
-      </td>
-      <td>
-        ${
-          item.type === "transaction"
-            ? `<button class="btn btn-sm btn-outline" onclick="showTransactionDetails(${index})">View Details</button>`
+        <span class="confidence-text">${Number.parseFloat(item.confidence).toFixed(2)}%</span>
+      </div>
+    </td>
+    <td>
+      ${
+        item.type === "transaction"
+          ? `<button class="btn btn-sm btn-outline" onclick="showDetails(${index}, 'transaction')">View Details</button>`
+          : item.fullDetails.userMail &&
+              item.fullDetails.userMail !== "No mail" &&
+              item.fullDetails.userMail !== "no mail" &&
+              item.fullDetails.userMail !== ""
+            ? `<button class="btn btn-sm btn-outline" onclick="showDetails(${index}, 'website')">View Details</button>`
             : `<span class="text-light">-</span>`
-        }
-      </td>
-    `
+      }
+    </td>
+  `
 
     tableBody.appendChild(row)
   })
@@ -424,6 +414,97 @@ function displayHistoryData(data, clearTable = false) {
   }
 }
 
+function showDetails(index, type) {
+  const item = window.currentHistoryData[index]
+  if (item && item.fullDetails) {
+    updateModalContent(item.fullDetails, type)
+  }
+}
+
+function updateModalContent(details, type) {
+  const modal = document.getElementById("transactionModal")
+  const modalHeader = modal.querySelector(".modal-header h3")
+  const modalBody = modal.querySelector(".modal-body")
+
+  // Clear previous content
+  modalBody.innerHTML = ""
+
+  // Set modal title
+  modalHeader.textContent = type === "transaction" ? "Transaction Details" : "Website Check Details"
+
+  // Common details
+  addDetailRow(modalBody, type === "transaction" ? "Transaction ID:" : "Target URL:", details.originalTarget)
+  addDetailRow(modalBody, "Prediction:", details.prediction === 1 ? "Fraudulent" : "Legitimate")
+  addDetailRow(
+    modalBody,
+    "User Mail:",
+    details.userMail && details.userMail !== "No mail" && details.userMail !== "no mail" && details.userMail !== ""
+      ? details.userMail
+      : "No mail provided",
+  )
+  addDetailRow(modalBody, "Method:", details.method || "N/A")
+  addDetailRow(modalBody, "Confidence:", `${Number.parseFloat(details.confidence).toFixed(2)}%`)
+  addDetailRow(modalBody, "Timestamp:", details.timestamp)
+
+  // Type-specific details
+  if (type === "transaction" && details.transactionSpecificData) {
+    const tsd = details.transactionSpecificData
+    addDetailRow(modalBody, "Source:", tsd.source || "N/A")
+    addDetailRow(modalBody, "Browser:", tsd.browser || "N/A")
+    addDetailRow(modalBody, "Sex:", tsd.sex || "N/A")
+    addDetailRow(modalBody, "Age:", tsd.age || "N/A")
+    addDetailRow(modalBody, "Country:", tsd.country_name || "N/A")
+    addDetailRow(modalBody, "Devices Occurred:", tsd.n_device_occur || "N/A")
+    addDetailRow(
+      modalBody,
+      "Signup Date:",
+      formatSignupPurchaseDate(tsd.signup_month, tsd.signup_day, tsd.signup_day_name),
+    )
+    addDetailRow(
+      modalBody,
+      "Purchase Date:",
+      formatSignupPurchaseDate(tsd.purchase_month, tsd.purchase_day, tsd.purchase_day_name),
+    )
+    addDetailRow(modalBody, "Purchase Over Time:", tsd.purchase_over_time ? `$${tsd.purchase_over_time}` : "N/A")
+  }
+
+  modal.style.display = "block"
+}
+
+// Helper function to create a detail row
+function addDetailRow(parent, label, value) {
+  const row = document.createElement("div")
+  row.classList.add("detail-row")
+  row.innerHTML = `
+  <span class="detail-label">${label}</span>
+  <span class="detail-value">${value}</span>
+`
+  parent.appendChild(row)
+}
+
+// Helper function for formatting signup/purchase dates
+function formatSignupPurchaseDate(month, day, dayName) {
+  if (month && day && dayName) {
+    // Assuming month is 1-indexed
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ]
+    return `${dayName}, ${monthNames[month - 1]} ${day}`
+  }
+  return "N/A"
+}
+
 function showNoHistoryData() {
   const tableBody = document.getElementById("historyTableBody")
   const noResults = document.getElementById("noResults")
@@ -436,22 +517,22 @@ function showNoHistoryData() {
   if (noResults) {
     noResults.style.display = "block"
     noResults.innerHTML = `
-      <div class="no-results-content">
-        <i class="fas fa-history"></i>
-        <h3>No Transaction History</h3>
-        <p>You haven't performed any fraud checks yet. Start by checking websites or transactions to build your history.</p>
-        <div style="display: flex; gap: 1rem; margin-top: 1.5rem; justify-content: center;">
-          <a href="website-check.html" class="btn btn-primary btn-sm">
-            <i class="fas fa-globe"></i>
-            Check Website
-          </a>
-          <a href="transaction-check.html" class="btn btn-outline btn-sm">
-            <i class="fas fa-exchange-alt"></i>
-            Check Transaction
-          </a>
-        </div>
+    <div class="no-results-content">
+      <i class="fas fa-history"></i>
+      <h3>No Transaction History</h3>
+      <p>You haven't performed any fraud checks yet. Start by checking websites or transactions to build your history.</p>
+      <div style="display: flex; gap: 1rem; margin-top: 1.5rem; justify-content: center;">
+        <a href="website-check.html" class="btn btn-primary btn-sm">
+          <i class="fas fa-globe"></i>
+          Check Website
+        </a>
+        <a href="transaction-check.html" class="btn btn-outline btn-sm">
+          <i class="fas fa-exchange-alt"></i>
+          Check Transaction
+        </a>
       </div>
-    `
+    </div>
+  `
   }
 
   // Disable export and clear buttons when no data
@@ -465,22 +546,22 @@ function showHistoryError() {
   if (!tableBody) return
 
   tableBody.innerHTML = `
-    <tr>
-      <td colspan="6" style="text-align: center; padding: 3rem; color: var(--text-light);">
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
-          <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: var(--warning-color);"></i>
-          <div>
-            <h3 style="margin-bottom: 0.5rem; color: var(--text-color);">Unable to Load History</h3>
-            <p style="margin: 0;">There was an error loading your transaction history. Please try refreshing the page.</p>
-          </div>
-          <button onclick="loadHistoryData()" class="btn btn-outline btn-sm">
-            <i class="fas fa-refresh"></i>
-            Retry
-          </button>
+  <tr>
+    <td colspan="6" style="text-align: center; padding: 3rem; color: var(--text-light);">
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: var(--warning-color);"></i>
+        <div>
+          <h3 style="margin-bottom: 0.5rem; color: var(--text-color);">Unable to Load History</h3>
+          <p style="margin: 0;">There was an error loading your transaction history. Please try refreshing the page.</p>
         </div>
-      </td>
-    </tr>
-  `
+        <button onclick="loadHistoryData()" class="btn btn-outline btn-sm">
+          <i class="fas fa-refresh"></i>
+          Retry
+        </button>
+      </div>
+    </td>
+  </tr>
+`
 
   updateTotalResults(0)
 }
@@ -492,45 +573,78 @@ function updateTotalResults(count) {
   }
 }
 
-function showTransactionDetails(index) {
-  const item = window.currentHistoryData[index]
-  if (item && item.transactionData) {
-    updateTransactionModal(item.transactionData)
-  }
-}
-
-function updateTransactionModal(details) {
-  document.getElementById("modalAmount").textContent = `$${details.amount}`
-  document.getElementById("modalEmail").textContent = details.email
-  document.getElementById("modalMethod").textContent = details.method || "GUI"
-  document.getElementById("modalOldBalanceOrig").textContent = `$${details.oldBalanceOrig}`
-  document.getElementById("modalNewBalanceOrig").textContent = `$${details.newBalanceOrig}`
-  document.getElementById("modalOldBalanceDest").textContent = `$${details.oldBalanceDest}`
-  document.getElementById("modalNewBalanceDest").textContent = `$${details.newBalanceDest}`
-  document.getElementById("modalType").textContent = details.type
-  document.getElementById("modalIsFraud").textContent = details.isFraud
-  document.getElementById("modalIsFlaggedFraud").textContent = details.isFlaggedFraud
-
-  const modal = document.getElementById("transactionModal")
-  modal.style.display = "block"
-}
-
 function exportHistory() {
-  // Create CSV content
-  const headers = ["Type", "Target", "Date", "Result", "Confidence"]
+  const headers = [
+    "Type",
+    "Target",
+    "Date & Time",
+    "Result",
+    "Confidence",
+    "User Mail",
+    "Method",
+    "Source",
+    "Browser",
+    "Sex",
+    "Age",
+    "Country",
+    "Devices Occurred",
+    "Signup Month",
+    "Signup Day",
+    "Signup Day Name",
+    "Purchase Month",
+    "Purchase Day",
+    "Purchase Day Name",
+    "Purchase Over Time",
+  ]
+
   const csvContent = [
-    headers.join(","),
-    ...allHistoryData.map((item) =>
-      [item.type, `"${item.target}"`, `"${item.date.toLocaleString()}"`, item.result, `${item.confidence}%`].join(","),
-    ),
+    headers
+      .map((h) => `"${h}"`)
+      .join(","), // Quote headers
+    ...allHistoryData.map((item) => {
+      const details = item.fullDetails
+      const tsd = details.transactionSpecificData || {} // Transaction specific data
+
+      const row = [
+        item.type.charAt(0).toUpperCase() + item.type.slice(1),
+        item.target,
+        item.date,
+        item.result,
+        `${Number.parseFloat(item.confidence).toFixed(2)}%`,
+        details.userMail && details.userMail !== "No mail" && details.userMail !== "no mail" && details.userMail !== ""
+          ? details.userMail
+          : "No mail provided",
+        details.method || "N/A",
+        tsd.source || "",
+        tsd.browser || "",
+        tsd.sex || "",
+        tsd.age || "",
+        tsd.country_name || "",
+        tsd.n_device_occur || "",
+        tsd.signup_month || "",
+        tsd.signup_day || "",
+        tsd.signup_day_name || "",
+        tsd.purchase_month || "",
+        tsd.purchase_day || "",
+        tsd.purchase_day_name || "",
+        tsd.purchase_over_time || "",
+      ]
+      return row
+        .map((value) => {
+          // Ensure values are quoted and handle commas within values
+          const stringValue = String(value)
+          return `"${stringValue.replace(/"/g, '""')}"`
+        })
+        .join(",")
+    }),
   ].join("\n")
 
   // Create and download file
-  const blob = new Blob([csvContent], { type: "text/csv" })
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
   const url = window.URL.createObjectURL(blob)
   const a = document.createElement("a")
   a.href = url
-  a.download = `fraudshield_history_${new Date().toISOString().split("T")[0]}.csv`
+  a.download = `fraudshield_history_details_${new Date().toISOString().split("T")[0]}.csv`
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)

@@ -676,3 +676,17 @@ ul {
     flex: 1;
   }
 }
+
+.modal-content {
+  background-color: var(--background-color);
+  position: fixed; /* Use fixed positioning for true centering */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center both horizontally and vertically */
+  border-radius: 0.5rem;
+  width: 90%;
+  max-width: 650px; /* Increased width */
+  max-height: 70vh; /* Reduced max height */
+  overflow-y: auto; /* Enable vertical scrolling if content exceeds max-height */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}

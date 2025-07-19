@@ -150,9 +150,11 @@ function predict(event) {
 
   // Scroll to results
   predictionResultDiv.scrollIntoView({ behavior: "smooth" })
+  const user_id = localStorage.getItem("user_id")
 
   // Prepare data for API request
   const requestData = {
+    user_id,
     source,
     browser,
     sex,
