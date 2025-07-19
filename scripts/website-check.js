@@ -79,11 +79,13 @@ function handleWebsiteCheck(event) {
   const websiteUrl = document.getElementById("websiteUrl").value
   const urlOnlyMode = document.getElementById("urlOnlyMode").checked
   const userId = localStorage.getItem("user_id")
+  const clientMail = document.getElementById("clientMail").value
 
   // Prepare data for API request
   const requestData = {
     user_id: userId,
     url: websiteUrl,
+    mail: clientMail || null, // Add this line
   }
 
   // Add feature data only if not in URL-only mode
@@ -126,6 +128,12 @@ function handleWebsiteCheck(event) {
   document.getElementById("resultScoreBar").className = "score-fill"
   document.getElementById("resultScoreValue").textContent = "0%"
 
+  // Clear previous email sent message
+  const emailSentMessage = document.getElementById("emailSentMessage")
+  if (emailSentMessage) {
+    emailSentMessage.remove()
+  }
+
   // Scroll to results
   resultCard.scrollIntoView({ behavior: "smooth" })
 
@@ -140,16 +148,16 @@ function handleWebsiteCheck(event) {
     .then((response) => response.json())
     .then((data) => {
       console.log("Raw backend response:", data)
-      updateWebsiteCheckResults(data, websiteUrl)
+      updateWebsiteCheckResults(data, websiteUrl, clientMail) // Pass clientMail here
     })
     .catch((error) => {
       console.error("Error checking website:", error)
       // Don't generate dummy data - show the actual error
-      updateWebsiteCheckResults(null, websiteUrl, error.message)
+      updateWebsiteCheckResults(null, websiteUrl, clientMail, error.message) // Pass clientMail here
     })
 }
 
-function updateWebsiteCheckResults(data, websiteUrl, errorMessage = null) {
+function updateWebsiteCheckResults(data, websiteUrl, clientMail, errorMessage = null) {
   console.log("Processing results with data:", data)
 
   // Handle error case
@@ -253,6 +261,25 @@ function updateWebsiteCheckResults(data, websiteUrl, errorMessage = null) {
   const scoreLabel = document.querySelector(".result-score .result-label")
   if (scoreLabel) {
     scoreLabel.textContent = "Confidence Score:"
+  }
+
+  // Add conditional email sent message
+  const resultDetails = document.querySelector(".result-details")
+  let emailSentMessage = document.getElementById("emailSentMessage")
+
+  if (prediction === 1 && clientMail) {
+    if (!emailSentMessage) {
+      emailSentMessage = document.createElement("div")
+      emailSentMessage.id = "emailSentMessage"
+      emailSentMessage.className = "result-factors li risk-factor" // Reusing a class for styling
+      resultDetails.appendChild(emailSentMessage)
+    }
+    emailSentMessage.textContent = `An email has been sent to ${clientMail} regarding this fraudulent detection.`
+    emailSentMessage.style.marginTop = "1rem" // Add some spacing
+  } else {
+    if (emailSentMessage) {
+      emailSentMessage.remove()
+    }
   }
 
   console.log("Results update completed")
