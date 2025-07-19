@@ -42,7 +42,7 @@ function handleSignIn(event) {
   const encryptedPassword = encryptPassword(password)
   console.log(email, password)
 
-  const apiUrl = `http://127.0.0.1:8000/signin`
+  const apiUrl = `https://ecommerce-transaction-fraud-detection.onrender.com/signin`
 
   // Show loading state
   const signInButton = document.getElementById("signInButton")

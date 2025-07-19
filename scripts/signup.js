@@ -68,7 +68,7 @@ function handleSignUp(event) {
   signUpButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...'
   signUpButton.disabled = true
 
-  const apiUrl = `http://127.0.0.1:8000/signup`
+  const apiUrl = `https://ecommerce-transaction-fraud-detection.onrender.com/signup`
 
   fetch(apiUrl, {
     method: "POST",

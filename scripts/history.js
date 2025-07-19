@@ -231,7 +231,7 @@ function loadHistoryData() {
   }
 
   // Make API call to get transaction details
-  fetch(`http://127.0.0.1:8000/get_transaction_details`, {
+  fetch(`https://ecommerce-transaction-fraud-detection.onrender.com/get_transaction_details`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -542,7 +542,7 @@ function clearHistory() {
     const userId = localStorage.getItem("user_id")
 
     // Make API call to clear history
-    fetch(`http://127.0.0.1:8000/clear_history`, {
+    fetch(`https://ecommerce-transaction-fraud-detection.onrender.com/clear_history`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
