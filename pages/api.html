@@ -161,7 +161,11 @@ Content-Type: application/json</code></pre>
             <!-- Website Prediction Section -->
             <section id="website-prediction" class="api-section">
                 <h2>Website Fraud Prediction</h2>
-                <p>Analyze a website for potential fraud indicators based on various parameters.</p>
+                <p>The Website Fraud Prediction endpoint supports two modes of operation:</p>
+                <ul>
+                    <li><strong>URL Only Mode:</strong> Provide only the <code>url</code> parameter (which is mandatory) and an optional <code>mail</code> parameter. In this mode, the system will infer other website characteristics.</li>
+                    <li><strong>Detailed Mode:</strong> Provide the <code>url</code> parameter (mandatory) along with all other website-specific parameters (<code>credit_card_payment</code>, <code>money_back_payment</code>, etc.). In this mode, all listed parameters become mandatory, except for <code>mail</code> which remains optional.</li>
+                </ul>
                 
                 <h3>Website Values Parameters</h3>
                 <div class="params-table">
@@ -217,6 +221,12 @@ Content-Type: application/json</code></pre>
                                 <td>No</td>
                                 <td>Presence of company logo (0/1 or null)</td>
                             </tr>
+                            <tr>
+                                <td><code>mail</code></td>
+                                <td>string/null</td>
+                                <td>No</td>
+                                <td>Optional email address for notifications (if applicable to website context)</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -265,52 +275,88 @@ Content-Type: application/json</code></pre>
                         </thead>
                         <tbody>
                             <tr>
-                                <td><code>amount</code></td>
-                                <td>number</td>
-                                <td>Yes</td>
-                                <td>Transaction amount</td>
-                            </tr>
-                            <tr>
-                                <td><code>oldbalanceOrg</code></td>
-                                <td>number</td>
-                                <td>Yes</td>
-                                <td>Original account balance before transaction</td>
-                            </tr>
-                            <tr>
-                                <td><code>newbalanceOrig</code></td>
-                                <td>number</td>
-                                <td>Yes</td>
-                                <td>New account balance after transaction</td>
-                            </tr>
-                            <tr>
-                                <td><code>oldbalanceDest</code></td>
-                                <td>number</td>
-                                <td>Yes</td>
-                                <td>Destination account balance before transaction</td>
-                            </tr>
-                            <tr>
-                                <td><code>newbalanceDest</code></td>
-                                <td>number</td>
-                                <td>Yes</td>
-                                <td>Destination account balance after transaction</td>
-                            </tr>
-                            <tr>
-                                <td><code>isFlaggedFraud</code></td>
-                                <td>number</td>
-                                <td>Yes</td>
-                                <td>System flag (0 or 1)</td>
-                            </tr>
-                            <tr>
-                                <td><code>type</code></td>
+                                <td><code>source</code></td>
                                 <td>string</td>
                                 <td>Yes</td>
-                                <td>Transaction type: CASH_IN, CASH_OUT, DEBIT, PAYMENT, TRANSFER</td>
+                                <td>Source of the transaction (e.g., 'Ads', 'SEO', 'Direct')</td>
+                            </tr>
+                            <tr>
+                                <td><code>browser</code></td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>Browser used for the transaction (e.g., 'Chrome', 'Firefox', 'IE', 'Safari', 'Opera')</td>
+                            </tr>
+                            <tr>
+                                <td><code>sex</code></td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>Gender of the user ('F' or 'M')</td>
+                            </tr>
+                            <tr>
+                                <td><code>age</code></td>
+                                <td>number</td>
+                                <td>Yes</td>
+                                <td>Age of the user</td>
+                            </tr>
+                            <tr>
+                                <td><code>country_name</code></td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>Full country name where the transaction originated</td>
+                            </tr>
+                            <tr>
+                                <td><code>n_device_occur</code></td>
+                                <td>number</td>
+                                <td>Yes</td>
+                                <td>Number of devices user uses or used from same account <span class="info-tooltip" title="This refers to the count of distinct devices associated with the user's account."><i class="fas fa-info-circle"></i></span></td>
+                            </tr>
+                            <tr>
+                                <td><code>signup_month</code></td>
+                                <td>integer</td>
+                                <td>Yes</td>
+                                <td>Month of user signup (1-12)</td>
+                            </tr>
+                            <tr>
+                                <td><code>signup_day</code></td>
+                                <td>integer</td>
+                                <td>Yes</td>
+                                <td>Day of user signup (1-31)</td>
+                            </tr>
+                            <tr>
+                                <td><code>signup_day_name</code></td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>Day name of user signup (e.g., 'Monday')</td>
+                            </tr>
+                            <tr>
+                                <td><code>purchase_month</code></td>
+                                <td>integer</td>
+                                <td>Yes</td>
+                                <td>Month of purchase (1-12)</td>
+                            </tr>
+                            <tr>
+                                <td><code>purchase_day</code></td>
+                                <td>integer</td>
+                                <td>Yes</td>
+                                <td>Day of purchase (1-31)</td>
+                            </tr>
+                            <tr>
+                                <td><code>purchase_day_name</code></td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>Day name of purchase (e.g., 'Monday')</td>
+                            </tr>
+                            <tr>
+                                <td><code>purchase_over_time</code></td>
+                                <td>number</td>
+                                <td>Yes</td>
+                                <td>Purchase amount over time</td>
                             </tr>
                             <tr>
                                 <td><code>mail</code></td>
-                                <td>string</td>
+                                <td>string/null</td>
                                 <td>No</td>
-                                <td>Email address for notifications</td>
+                                <td>Optional email address for notifications</td>
                             </tr>
                         </tbody>
                     </table>
@@ -330,13 +376,19 @@ Content-Type: application/json</code></pre>
   -d '{
     "type": "Transaction",
     "values": {
-      "amount": 5000.00,
-      "oldbalanceOrg": 15000.00,
-      "newbalanceOrig": 10000.00,
-      "oldbalanceDest": 2000.00,
-      "newbalanceDest": 7000.00,
-      "isFlaggedFraud": 0,
-      "type": "TRANSFER",
+      "source": "web",
+      "browser": "Chrome",
+      "sex": "M",
+      "age": 30,
+      "country_name": "USA",
+      "n_device_occur": 1,
+      "signup_month": 1,
+      "signup_day": 15,
+      "signup_day_name": "Wednesday",
+      "purchase_month": 7,
+      "purchase_day": 20,
+      "purchase_day_name": "Saturday",
+      "purchase_over_time": 150.75,
       "mail": "user@example.com"
     }
   }'</code></pre>
