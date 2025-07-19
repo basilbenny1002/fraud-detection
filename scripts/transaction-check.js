@@ -118,7 +118,7 @@ function predict(event) {
   const purchase_day_name = getDayName(document.getElementById("purchase_date").value)
 
   const purchase_over_time = Number.parseFloat(document.getElementById("purchase_over_time").value)
-  const mail = document.getElementById("clientMail").value // Get mail value
+  const mail = document.getElementById("clientMail").value || null // Get mail value, set to null if empty
 
   console.log("Form data collected:", {
     source,
@@ -264,7 +264,7 @@ function displayPredictionResult(prediction, mail, confidence, errorMessage = ""
 
   predictionResultDiv.classList.add(resultClass)
 
-  // Only show email notification for fraudulent transactions
+  // Only show email notification for fraudulent transactions AND if mail was provided
   let emailNotification = ""
   if (mail && prediction === 1) {
     console.log("Adding email notification for fraudulent transaction")
