@@ -77,7 +77,7 @@ function loadDashboardData() {
 function fetchDashboardStats() {
   const userId = localStorage.getItem("user_id")
 
-  fetch(`https://ecommerce-transaction-fraud-detection.onrender.com//dashboard/stats`, {
+  fetch(`https://ecommerce-transaction-fraud-detection.onrender.com/dashboard/stats`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -116,7 +116,7 @@ function fetchRecentActivity() {
   const userId = localStorage.getItem("user_id")
 
   // Make API call to get recent activity
-  fetch(`https://ecommerce-transaction-fraud-detection.onrender.com//recent`, {
+  fetch(`https://ecommerce-transaction-fraud-detection.onrender.com/recent`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
