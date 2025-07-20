@@ -138,7 +138,7 @@ function handleWebsiteCheck(event) {
   resultCard.scrollIntoView({ behavior: "smooth" })
 
   // Make API call
-  fetch("http://127.0.0.1:8000/predict/website", {
+  fetch("https://ecommerce-transaction-fraud-detection.onrender.com/predict/website", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

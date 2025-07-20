@@ -174,7 +174,7 @@ function predict(event) {
   console.log("Request data being sent:", requestData)
 
   // Make API call
-  fetch("http://127.0.0.1:8000/predict/transaction", {
+  fetch("https://ecommerce-transaction-fraud-detection.onrender.com/predict/transaction", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
